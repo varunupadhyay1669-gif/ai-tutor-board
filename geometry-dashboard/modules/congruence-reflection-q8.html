@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometric Transformations Teacher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      canvas {
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white p-6 shadow-lg">
+      <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold">Geometric Transformations &amp; Congruence</h1>
+        <p class="opacity-90 mt-2">Visualizing how mapping creates congruent figures.</p>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 space-y-8">
+      <!-- PART 1: First Principles -->
+      <section class="grid md:grid-cols-2 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-indigo-500">
+          <h2 class="text-xl font-bold text-indigo-700 mb-4">1. First Principles: The "Why"</h2>
+
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-bold text-gray-900">What is a Rigid Transformation?</h3>
+              <p class="text-gray-600 text-sm">
+                A rigid transformation (or isometry) moves a shape without changing its size or shape. Think of it like
+                moving furniture: you can slide it (Translation), spin it (Rotation), or flip it (Reflection), but the
+                furniture itself doesn&apos;t stretch or shrink.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="font-bold text-gray-900">Key Properties Preserved</h3>
+              <ul class="list-disc list-inside text-sm text-gray-600 ml-2">
+                <li><strong>Side Lengths:</strong> Distance between points stays the same.</li>
+                <li><strong>Angle Measures:</strong> Corner sharpness stays the same.</li>
+                <li><strong>Area:</strong> The space inside stays the same.</li>
+              </ul>
+            </div>
+
+            <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+              <h3 class="font-bold text-yellow-800 text-sm">⚠️ The Golden Rule: Correspondence</h3>
+              <p class="text-xs text-yellow-800 mt-1">Order matters! If Triangle ABC maps to Triangle A&apos;B&apos;C&apos;:</p>
+              <div class="grid grid-cols-3 gap-2 text-center text-xs font-mono mt-2 font-bold">
+                <div class="bg-white p-1 rounded">A ↔ A&apos;</div>
+                <div class="bg-white p-1 rounded">B ↔ B&apos;</div>
+                <div class="bg-white p-1 rounded">C ↔ C&apos;</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-center items-center text-center">
+          <h3 class="text-lg font-bold text-gray-700 mb-2">Visual Concept</h3>
+          <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+            <div class="absolute inset-0 grid grid-cols-2">
+              <div class="border-r border-dashed border-gray-400 flex items-center justify-center">
+                <div class="w-16 h-16 border-b-4 border-r-4 border-blue-500 transform skew-x-12">Original</div>
+              </div>
+              <div class="flex items-center justify-center">
+                <div class="w-16 h-16 border-b-4 border-l-4 border-red-500 transform -skew-x-12">Reflected</div>
+              </div>
+            </div>
+            <div class="absolute text-xs text-gray-500 bottom-2">Reflection across the center line</div>
+          </div>
+          <p class="text-sm text-gray-500 mt-4">
+            In the problem below, Triangle ABC is <strong>reflected</strong> across a vertical line to create
+            A&apos;B&apos;C&apos;.
+          </p>
+        </div>
+      </section>
+
+      <!-- PART 2: The Simulation -->
+      <section class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+          <h2 class="text-xl font-bold text-gray-800">2. Interactive Simulation</h2>
+          <div class="text-sm text-gray-500">Based on Question #8</div>
+        </div>
+
+        <div class="relative w-full h-[400px] bg-white cursor-crosshair">
+          <canvas id="geoCanvas"></canvas>
+
+          <!-- Overlay for Angle Hint -->
+          <div
+            id="angleHint"
+            class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-4 py-2 rounded-full shadow-lg text-sm font-bold hidden border border-red-300"
+          >
+            Order Error! Angle C corresponds to C&apos;, not B&apos;!
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="p-6 bg-gray-100 border-t border-gray-200 grid md:grid-cols-4 gap-4">
+          <button onclick="resetSim()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded transition">
+            Reset
+          </button>
+          <button
+            onclick="animateReflection()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition shadow-sm"
+          >
+            ▶ Play Reflection
+          </button>
+          <button
+            onclick="toggleOverlay()"
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition shadow-sm"
+          >
+            Show Superimposition
+          </button>
+          <button onclick="checkAngles()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition shadow-sm">
+            Analyze Angles
+          </button>
+        </div>
+      </section>
+
+      <!-- PART 3: Analysis of User Question -->
+      <section class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">3. Solving Question 8</h2>
+
+        <div class="space-y-4">
+          <div class="flex items-start gap-3">
+            <div class="mt-1 bg-green-100 text-green-700 p-1 rounded">✅</div>
+            <div>
+              <p class="font-bold">$\\overline{AB} = \\overline{A'B'}$</p>
+              <p class="text-sm text-gray-600">
+                <strong>Correct.</strong> Rigid transformations preserve distance. Side AB matches A&apos;B&apos;.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="mt-1 bg-red-100 text-red-700 p-1 rounded">❌</div>
+            <div>
+              <p class="font-bold">$\\angle ACB$ is congruent to $\\angle C'B'A$</p>
+              <p class="text-sm text-gray-600">
+                <strong>Incorrect.</strong> This mixes up correspondence. Angle C corresponds to C&apos;, not B&apos;.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="mt-1 bg-green-100 text-green-700 p-1 rounded">✅</div>
+            <div>
+              <p class="font-bold">The areas of the triangles are the same</p>
+              <p class="text-sm text-gray-600">
+                <strong>Correct.</strong> Rigid transformations don&apos;t stretch or shrink, so area stays the same.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="mt-1 bg-green-100 text-green-700 p-1 rounded">✅</div>
+            <div>
+              <p class="font-bold">Triangle ABC could have been translated, rotated, and/or reflected...</p>
+              <p class="text-sm text-gray-600">
+                <strong>Correct.</strong> The mapping shown is a reflection, which is a valid rigid transformation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-6 text-center text-sm">
+      <p>Interactive Geometry Module generated by Gemini</p>
+    </footer>
+
+    <script>
+      const canvas = document.getElementById("geoCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas resolution
+      function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.offsetWidth;
+        canvas.height = container.offsetHeight;
+        drawState();
+      }
+      window.addEventListener("resize", resizeCanvas);
+
+      // Simulation State
+      let animationProgress = 0; // 0 to 1
+      let isReflected = false;
+      let showOverlay = false;
+      let showAngleAnalysis = false;
+      let animationId = null;
+
+      // Triangle Coordinates (Relative 0-1 scale)
+      const triRight = {
+        A: { x: 0.65, y: 0.2 },
+        B: { x: 0.55, y: 0.7 },
+        C: { x: 0.85, y: 0.8 },
+      };
+
+      // The target (Reflected)
+      const triLeft = {
+        A: { x: 0.35, y: 0.2 },
+        B: { x: 0.45, y: 0.7 },
+        C: { x: 0.15, y: 0.8 },
+      };
+
+      function getCanvasCoords(point) {
+        return {
+          x: point.x * canvas.width,
+          y: point.y * canvas.height,
+        };
+      }
+
+      function drawGrid() {
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1;
+
+        // Draw axis of reflection
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, 0);
+        ctx.lineTo(canvas.width / 2, canvas.height);
+        ctx.setLineDash([10, 5]);
+        ctx.strokeStyle = "#9ca3af";
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label axis
+        ctx.fillStyle = "#6b7280";
+        ctx.font = "12px Inter";
+        ctx.fillText("Axis of Reflection", canvas.width / 2 + 5, 20);
+      }
+
+      function drawTriangle(pts, color, labelSuffix, opacity = 1, highlightAngles = false) {
+        const A = getCanvasCoords(pts.A);
+        const B = getCanvasCoords(pts.B);
+        const C = getCanvasCoords(pts.C);
+
+        ctx.fillStyle = color + Math.floor(opacity * 255).toString(16).padStart(2, "0");
+        ctx.strokeStyle = "#374151"; // Dark gray
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.closePath();
+
+        ctx.fill();
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = "#111827";
+        ctx.font = "bold 16px Inter";
+        ctx.fillText("A" + labelSuffix, A.x, A.y - 10);
+        ctx.fillText("B" + labelSuffix, B.x, B.y + 20);
+        ctx.fillText("C" + labelSuffix, C.x, C.y + 20);
+
+        // Highlight Angles if requested
+        if (highlightAngles) {
+          drawAngle(C, "red");
+          drawAngle(B, "blue");
+        }
+      }
+
+      function drawAngle(pt, color) {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 20, 0, 2 * Math.PI);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.5;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      function drawState() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+
+        // 1. Draw Target (Left) Triangle - The "Goal"
+        if (!showOverlay) {
+          drawTriangle(triLeft, "#e0e7ff", "'", 1, showAngleAnalysis);
+        }
+
+        // 2. Draw Source (Right) Triangle or Animated Triangle
+        const currA = interpolate(triRight.A, triLeft.A, animationProgress);
+        const currB = interpolate(triRight.B, triLeft.B, animationProgress);
+        const currC = interpolate(triRight.C, triLeft.C, animationProgress);
+
+        let color = "#4ade80"; // Green
+        if (showOverlay && animationProgress >= 0.99) {
+          color = "#facc15"; // Yellow when superimposed
+        }
+
+        drawTriangle({ A: currA, B: currB, C: currC }, color, animationProgress > 0.5 ? "'" : "", 0.7, showAngleAnalysis);
+
+        // Connectors during animation
+        if (animationProgress > 0 && animationProgress < 1) {
+          drawConnector(triRight.A, triLeft.A);
+          drawConnector(triRight.B, triLeft.B);
+          drawConnector(triRight.C, triLeft.C);
+        }
+      }
+
+      function interpolate(p1, p2, t) {
+        return {
+          x: p1.x + (p2.x - p1.x) * t,
+          y: p1.y + (p2.y - p1.y) * t,
+        };
+      }
+
+      function drawConnector(p1, p2) {
+        const start = getCanvasCoords(p1);
+        const end = getCanvasCoords(p2);
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.strokeStyle = "rgba(100,100,100,0.3)";
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // --- Interaction Functions ---
+
+      function animateReflection() {
+        showOverlay = false;
+        showAngleAnalysis = false;
+        document.getElementById("angleHint").classList.add("hidden");
+        const start = Date.now();
+        const duration = 1500; // 1.5s
+
+        if (animationProgress > 0.5) animationProgress = 0;
+
+        function loop() {
+          let timePassed = Date.now() - start;
+          let t = timePassed / duration;
+          if (t > 1) t = 1;
+
+          // Easing
+          t = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+          animationProgress = t;
+          drawState();
+
+          if (t < 1) {
+            animationId = requestAnimationFrame(loop);
+          } else {
+            isReflected = true;
+          }
+        }
+
+        if (animationId) cancelAnimationFrame(animationId);
+        loop();
+      }
+
+      function resetSim() {
+        if (animationId) cancelAnimationFrame(animationId);
+        animationProgress = 0;
+        isReflected = false;
+        showOverlay = false;
+        showAngleAnalysis = false;
+        document.getElementById("angleHint").classList.add("hidden");
+        drawState();
+      }
+
+      function toggleOverlay() {
+        if (animationId) cancelAnimationFrame(animationId);
+        showOverlay = !showOverlay;
+        showAngleAnalysis = false;
+        document.getElementById("angleHint").classList.add("hidden");
+        animationProgress = 1;
+        drawState();
+      }
+
+      function checkAngles() {
+        resetSim();
+        showAngleAnalysis = true;
+        document.getElementById("angleHint").classList.remove("hidden");
+        drawState();
+      }
+
+      // Init
+      setTimeout(resizeCanvas, 100);
+    </script>
+  </body>
+</html>
+

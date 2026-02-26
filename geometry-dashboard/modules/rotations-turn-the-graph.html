@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometry Rotations: Turn the Graph</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f4f8;
+      }
+      .grid-container {
+        perspective: 1000px;
+      }
+      .paper-layer {
+        transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center center;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      }
+      /* Smooth coordinate transitions */
+      .coord-value {
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState } = React;
+
+      const GRID_SIZE = 10; // -10 to 10
+      const CELL_SIZE = 30;
+      const WIDTH = CELL_SIZE * (GRID_SIZE * 2 + 1); // 21 cells total (including 0)
+      const HEIGHT = WIDTH;
+      const CENTER = WIDTH / 2;
+
+      const App = () => {
+        // State
+        const [point, setPoint] = useState({ x: 3, y: 2 });
+        const [rotation, setRotation] = useState(0); // 0, 90, 180, 270 (Counter Clockwise)
+
+        // Calculate the "New" coordinates based on rotation
+        // This represents the coordinates relative to the screen (viewer's perspective)
+        const getTransformedCoordinates = (x, y, rot) => {
+          // Normalize rotation to 0-360
+          const r = ((rot % 360) + 360) % 360;
+
+          if (r === 90) return { x: -y, y: x };
+          if (r === 180) return { x: -x, y: -y };
+          if (r === 270) return { x: y, y: -x };
+          return { x: x, y: y };
+        };
+
+        const result = getTransformedCoordinates(point.x, point.y, rotation);
+
+        // Handlers
+        const handleRotate = (deg) => {
+          setRotation(deg);
+        };
+
+        const reset = () => {
+          setRotation(0);
+          setPoint({ x: 3, y: 2 });
+        };
+
+        // Helper to render grid lines
+        const renderGridLines = (color, opacity = 1) => {
+          const lines = [];
+          for (let i = -GRID_SIZE; i <= GRID_SIZE; i++) {
+            const pos = CENTER + i * CELL_SIZE;
+
+            // Vertical Line
+            lines.push(
+              <line
+                key={`v${i}`}
+                x1={pos}
+                y1={0}
+                x2={pos}
+                y2={HEIGHT}
+                stroke={color}
+                strokeWidth={i === 0 ? 2.5 : 1}
+                opacity={i === 0 ? 1 : opacity}
+              />,
+            );
+
+            // Horizontal Line
+            lines.push(
+              <line
+                key={`h${i}`}
+                x1={0}
+                y1={pos}
+                x2={WIDTH}
+                y2={pos}
+                stroke={color}
+                strokeWidth={i === 0 ? 2.5 : 1}
+                opacity={i === 0 ? 1 : opacity}
+              />,
+            );
+          }
+          return lines;
+        };
+
+        return (
+          <div className="min-h-screen flex flex-col items-center py-8 px-4">
+            {/* Header Section */}
+            <div className="text-center max-w-2xl mb-8">
+              <h1 className="text-3xl font-bold text-slate-800 mb-2">
+                <i className="fa-solid fa-rotate-left mr-2 text-blue-600"></i>
+                Rotations: "Turn the Graph"
+              </h1>
+              <p className="text-slate-600">
+                Don&apos;t memorize rules! As shown in the video, simply{" "}
+                <span className="font-bold text-blue-600">rotate the coordinate plane</span> and see where your point
+                lands.
+              </p>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              {/* Control Panel */}
+              <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm border border-slate-100">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 border-b pb-2">1. Set Point A</h2>
+
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="flex justify-between text-sm font-medium text-slate-500 mb-1">
+                      <span>X Coordinate</span>
+                      <span className="text-slate-900 font-bold">{point.x}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="-8"
+                      max="8"
+                      step="1"
+                      value={point.x}
+                      onChange={(e) => setPoint({ ...point, x: parseInt(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex justify-between text-sm font-medium text-slate-500 mb-1">
+                      <span>Y Coordinate</span>
+                      <span className="text-slate-900 font-bold">{point.y}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="-8"
+                      max="8"
+                      step="1"
+                      value={point.y}
+                      onChange={(e) => setPoint({ ...point, y: parseInt(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 border-b pb-2">2. Rotate Graph (CCW)</h2>
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <button
+                    onClick={() => handleRotate(0)}
+                    className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      rotation === 0 ? "bg-slate-800 text-white shadow-lg" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    0° (Reset)
+                  </button>
+                  <button
+                    onClick={() => handleRotate(90)}
+                    className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      rotation === 90
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                        : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                    }`}
+                  >
+                    90°
+                  </button>
+                  <button
+                    onClick={() => handleRotate(180)}
+                    className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      rotation === 180
+                        ? "bg-purple-600 text-white shadow-lg shadow-purple-200"
+                        : "bg-purple-50 text-purple-600 hover:bg-purple-100"
+                    }`}
+                  >
+                    180°
+                  </button>
+                  <button
+                    onClick={() => handleRotate(270)}
+                    className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      rotation === 270
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                        : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                    }`}
+                  >
+                    270°
+                  </button>
+                </div>
+
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <h3 className="text-sm uppercase tracking-wide text-slate-500 font-semibold mb-2">Results</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Original (A):</span>
+                      <span className="font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-800">
+                        ({point.x}, {point.y})
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Rotation:</span>
+                      <span className="font-medium text-slate-800">{rotation}° CCW</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-200 mt-2">
+                      <span className="text-blue-700 font-bold">New Position (A&apos;):</span>
+                      <span className="font-mono bg-blue-100 px-3 py-1 rounded border border-blue-200 text-blue-800 font-bold transition-all duration-300">
+                        ({result.x}, {result.y})
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visualization Area */}
+              <div
+                className="relative flex justify-center items-center p-4 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden"
+                style={{ width: WIDTH + 40, height: HEIGHT + 40 }}
+              >
+                {/* Layer 1: Static Background Grid (The Viewer&apos;s Frame) */}
+                <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-40">
+                  <svg width={WIDTH} height={HEIGHT} className="overflow-visible">
+                    {renderGridLines("#94a3b8", 0.3)}
+                    {/* Standard Axes Labels for Reference */}
+                    <text x={WIDTH - 10} y={CENTER + 15} fill="#64748b" fontSize="12" fontWeight="bold">
+                      x
+                    </text>
+                    <text x={CENTER + 5} y={15} fill="#64748b" fontSize="12" fontWeight="bold">
+                      y
+                    </text>
+                  </svg>
+                </div>
+
+                {/* Layer 2: The Rotating Paper */}
+                <div
+                  className="paper-layer bg-white bg-opacity-90 border border-slate-300 shadow-lg rounded-sm"
+                  style={{
+                    width: WIDTH,
+                    height: HEIGHT,
+                    transform: `rotate(-${rotation}deg)`, // Negative for Counter-Clockwise (CSS positive rotates clockwise)
+                  }}
+                >
+                  <svg width={WIDTH} height={HEIGHT} className="overflow-visible">
+                    {/* Paper Grid Lines */}
+                    {renderGridLines("#cbd5e1", 0.6)}
+
+                    {/* Axes */}
+                    <line x1={CENTER} y1={0} x2={CENTER} y2={HEIGHT} stroke="black" strokeWidth="2" />
+                    <line x1={0} y1={CENTER} x2={WIDTH} y2={CENTER} stroke="black" strokeWidth="2" />
+
+                    {/* Axis Labels (They rotate with the paper!) */}
+                    <text x={WIDTH - 20} y={CENTER + 20} fill="black" fontSize="14" fontWeight="bold">
+                      x
+                    </text>
+                    <text x={CENTER + 10} y={20} fill="black" fontSize="14" fontWeight="bold">
+                      y
+                    </text>
+
+                    {/* The Point A */}
+                    <g transform={`translate(${CENTER + point.x * CELL_SIZE}, ${CENTER - point.y * CELL_SIZE})`}>
+                      <circle r="6" fill="#ef4444" stroke="white" strokeWidth="2" />
+                      <text x="10" y="-10" fill="#ef4444" fontSize="16" fontWeight="bold">
+                        A
+                      </text>
+                      <text x="10" y="5" fill="#333" fontSize="10" className="font-mono">
+                        ({point.x}, {point.y})
+                      </text>
+                    </g>
+                  </svg>
+
+                  {/* Orientation Marker (Top Left Corner of Paper) */}
+                  <div className="absolute top-2 left-2 text-xs text-slate-400 font-mono">Top-Left</div>
+                </div>
+
+                {/* Overlay Instructions if not rotated */}
+                {rotation === 0 && (
+                  <div className="absolute bottom-6 bg-yellow-50 text-yellow-800 text-xs px-3 py-1 rounded-full border border-yellow-200 shadow-sm animate-pulse">
+                    Ready to rotate!
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-8 max-w-2xl text-slate-500 text-sm text-center">
+              <p>
+                Notice how the point <strong>A</strong> stays fixed on the paper (the grid), but as the paper turns, A
+                moves to a new position relative to your screen (the faint grey background grid).
+              </p>
+              <div className="mt-3">
+                <button
+                  className="text-xs text-slate-500 underline hover:text-blue-600"
+                  onClick={reset}
+                  type="button"
+                >
+                  Reset point and rotation
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
+

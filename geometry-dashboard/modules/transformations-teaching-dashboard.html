@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometric Transformations Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8fafc;
+      }
+      .canvas-container {
+        position: relative;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        cursor: crosshair;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .btn {
+        transition: all 0.2s;
+      }
+      .btn:active {
+        transform: scale(0.95);
+      }
+      .tab-active {
+        border-bottom: 3px solid #3b82f6;
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+      .tab-inactive {
+        border-bottom: 3px solid transparent;
+        color: #64748b;
+      }
+      .tab-inactive:hover {
+        color: #334155;
+      }
+
+      /* Custom coordinate tooltip */
+      .tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        pointer-events: none;
+        display: none;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body class="h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-600 text-white p-2 rounded-lg">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-800">Geometry Transformations</h1>
+          <p class="text-xs text-gray-500">Interactive Teaching Dashboard</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="switchTab('principles')" id="tab-principles" class="tab-active px-4 py-2">
+          First Principles
+        </button>
+        <button onclick="switchTab('q3')" id="tab-q3" class="tab-inactive px-4 py-2">Problem 3 (Triangle)</button>
+        <button onclick="switchTab('q4')" id="tab-q4" class="tab-inactive px-4 py-2">Problem 4 (Quad)</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+      <!-- Controls Sidebar -->
+      <aside class="w-1/3 bg-white border-r border-gray-200 p-6 flex flex-col overflow-y-auto">
+        <!-- Principles Controls -->
+        <div id="controls-principles" class="space-y-6">
+          <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+            <h2 class="font-bold text-blue-800 text-lg mb-2">Explore Concepts</h2>
+            <p class="text-sm text-blue-600">Select a shape and apply transformations to see how coordinates change.</p>
+          </div>
+
+          <div class="space-y-3">
+            <label class="block text-sm font-semibold text-gray-700">Select Shape</label>
+            <div class="flex gap-2">
+              <button onclick="setPrincipleShape('triangle')" class="flex-1 py-2 border rounded hover:bg-gray-50 text-sm">
+                Triangle
+              </button>
+              <button onclick="setPrincipleShape('square')" class="flex-1 py-2 border rounded hover:bg-gray-50 text-sm">
+                Square
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="block text-sm font-semibold text-gray-700">Reflections</label>
+            <button
+              onclick="applyPrincipleTransform('reflectX')"
+              class="w-full btn bg-indigo-100 text-indigo-700 py-2 rounded font-medium hover:bg-indigo-200 text-left px-4"
+            >
+              <i class="fa-solid fa-arrows-up-down mr-2"></i> Reflect over X-Axis (y → -y)
+            </button>
+            <button
+              onclick="applyPrincipleTransform('reflectY')"
+              class="w-full btn bg-indigo-100 text-indigo-700 py-2 rounded font-medium hover:bg-indigo-200 text-left px-4"
+            >
+              <i class="fa-solid fa-arrows-left-right mr-2"></i> Reflect over Y-Axis (x → -x)
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <label class="block text-sm font-semibold text-gray-700">Rotations (around origin)</label>
+            <button
+              onclick="applyPrincipleTransform('rotate90')"
+              class="w-full btn bg-emerald-100 text-emerald-700 py-2 rounded font-medium hover:bg-emerald-200 text-left px-4"
+            >
+              <i class="fa-solid fa-rotate-right mr-2"></i> Rotate 90° CW
+            </button>
+            <button
+              onclick="applyPrincipleTransform('rotate180')"
+              class="w-full btn bg-emerald-100 text-emerald-700 py-2 rounded font-medium hover:bg-emerald-200 text-left px-4"
+            >
+              <i class="fa-solid fa-sync mr-2"></i> Rotate 180°
+            </button>
+          </div>
+
+          <div class="mt-auto pt-6 border-t">
+            <button onclick="resetPrinciples()" class="w-full py-2 text-gray-500 hover:text-red-500 text-sm">
+              <i class="fa-solid fa-rotate-left"></i> Reset Shape
+            </button>
+          </div>
+        </div>
+
+        <!-- Problem 3 Controls -->
+        <div id="controls-q3" class="hidden space-y-6">
+          <div class="bg-gray-100 p-4 rounded-lg">
+            <h3 class="font-bold text-gray-700">Goal: Map Triangle STU to S'T'U'</h3>
+            <div class="mt-2 text-sm space-y-1 text-gray-600">
+              <p>S(-4, -1) → S'(1, -1)</p>
+              <p>T(-4, -5) → T'(1, 3)</p>
+              <p>U(-1, -5) → U'(4, 3)</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="relative pl-8 border-l-2 border-gray-200 pb-6">
+              <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+              <h4 class="font-bold text-gray-800">Step 1: Reflection</h4>
+              <p class="text-sm text-gray-500 mb-2">Reflect over the line y = -1</p>
+              <button onclick="runScenario('q3', 1)" class="btn bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 w-full">
+                Run Step 1
+              </button>
+              <p class="text-xs text-blue-600 mt-2 italic" id="q3-step1-feedback"></p>
+            </div>
+
+            <div class="relative pl-8 border-l-2 border-gray-200">
+              <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300" id="q3-dot-2"></div>
+              <h4 class="font-bold text-gray-800">Step 2: Translation</h4>
+              <p class="text-sm text-gray-500 mb-2">Translate Right 5 units</p>
+              <button
+                onclick="runScenario('q3', 2)"
+                class="btn bg-gray-200 text-gray-400 cursor-not-allowed px-4 py-2 rounded shadow w-full"
+                id="q3-btn-2"
+                disabled
+              >
+                Run Step 2
+              </button>
+              <p class="text-xs text-blue-600 mt-2 italic" id="q3-step2-feedback"></p>
+            </div>
+          </div>
+
+          <button onclick="resetScenario('q3')" class="mt-8 border border-gray-300 text-gray-600 px-4 py-2 rounded hover:bg-gray-50 w-full">
+            <i class="fa-solid fa-redo mr-2"></i> Reset Simulation
+          </button>
+        </div>
+
+        <!-- Problem 4 Controls -->
+        <div id="controls-q4" class="hidden space-y-6">
+          <div class="bg-gray-100 p-4 rounded-lg">
+            <h3 class="font-bold text-gray-700">Goal: Map Quad EFGH to E'F'G'H'</h3>
+            <div class="mt-2 text-sm space-y-1 text-gray-600">
+              <p>E(-4, -5) → E'(-1, 3)</p>
+              <p>H(-5, -2) → H'(0, 0)</p>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 p-3 rounded text-xs text-amber-800">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+            Correction: The visual graph requires moving LEFT, though the text answer said "Right". We will follow the visual graph.
+          </div>
+
+          <div class="space-y-4">
+            <div class="relative pl-8 border-l-2 border-gray-200 pb-6">
+              <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+              <h4 class="font-bold text-gray-800">Step 1: Rotation</h4>
+              <p class="text-sm text-gray-500 mb-2">Rotate 180° counter-clockwise around origin</p>
+              <button onclick="runScenario('q4', 1)" class="btn bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 w-full">
+                Run Step 1
+              </button>
+              <p class="text-xs text-blue-600 mt-2 italic" id="q4-step1-feedback"></p>
+            </div>
+
+            <div class="relative pl-8 border-l-2 border-gray-200">
+              <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300" id="q4-dot-2"></div>
+              <h4 class="font-bold text-gray-800">Step 2: Translation</h4>
+              <p class="text-sm text-gray-500 mb-2">Translate 5 Left and 2 Down</p>
+              <button
+                onclick="runScenario('q4', 2)"
+                class="btn bg-gray-200 text-gray-400 cursor-not-allowed px-4 py-2 rounded shadow w-full"
+                id="q4-btn-2"
+                disabled
+              >
+                Run Step 2
+              </button>
+              <p class="text-xs text-blue-600 mt-2 italic" id="q4-step2-feedback"></p>
+            </div>
+          </div>
+
+          <button onclick="resetScenario('q4')" class="mt-8 border border-gray-300 text-gray-600 px-4 py-2 rounded hover:bg-gray-50 w-full">
+            <i class="fa-solid fa-redo mr-2"></i> Reset Simulation
+          </button>
+        </div>
+      </aside>
+
+      <!-- Canvas Area -->
+      <div class="flex-1 bg-slate-100 p-8 flex items-center justify-center">
+        <div class="canvas-container w-[600px] h-[600px]" id="canvas-wrapper">
+          <canvas id="geoCanvas" width="1200" height="1200"></canvas>
+          <div id="tooltip" class="tooltip"></div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // --- Core Geometric Logic ---
+
+      class GeometryApp {
+        constructor(canvasId) {
+          this.canvas = document.getElementById(canvasId);
+          this.ctx = this.canvas.getContext("2d");
+          this.width = this.canvas.width;
+          this.height = this.canvas.height;
+
+          // Grid settings
+          this.gridSize = 60; // Pixels per unit
+          this.origin = { x: this.width / 2, y: this.height / 2 };
+
+          // State
+          this.currentTab = "principles";
+          this.shapes = []; // reserved
+          this.animating = false;
+
+          // Interactive shape for Principles
+          this.principleShape = [
+            { x: 1, y: 1, label: "A" },
+            { x: 3, y: 1, label: "B" },
+            { x: 1, y: 4, label: "C" },
+          ];
+
+          // Scenarios Data
+          this.scenarios = {
+            q3: {
+              start: [
+                { x: -4, y: -1, label: "S" },
+                { x: -4, y: -5, label: "T" },
+                { x: -1, y: -5, label: "U" },
+              ],
+              goal: [
+                { x: 1, y: -1, label: "S'" },
+                { x: 1, y: 3, label: "T'" },
+                { x: 4, y: 3, label: "U'" },
+              ],
+              step1: [
+                // Reflect y = -1
+                { x: -4, y: -1, label: "S" },
+                { x: -4, y: 3, label: "T" },
+                { x: -1, y: 3, label: "U" },
+              ],
+              step2: [
+                // Translate Right 5
+                { x: 1, y: -1, label: "S'" },
+                { x: 1, y: 3, label: "T'" },
+                { x: 4, y: 3, label: "U'" },
+              ],
+              lines: [{ type: "horizontal", y: -1, color: "#f59e0b", label: "y = -1" }],
+            },
+            q4: {
+              start: [
+                { x: -4, y: -5, label: "E" },
+                { x: -1, y: -4, label: "F" },
+                { x: -2, y: -1, label: "G" },
+                { x: -5, y: -2, label: "H" },
+              ],
+              goal: [
+                { x: -1, y: 3, label: "E'" },
+                { x: -4, y: 2, label: "F'" },
+                { x: -3, y: -1, label: "G'" },
+                { x: 0, y: 0, label: "H'" },
+              ],
+              step1: [
+                // Rotate 180
+                { x: 4, y: 5, label: "E" },
+                { x: 1, y: 4, label: "F" },
+                { x: 2, y: 1, label: "G" },
+                { x: 5, y: 2, label: "H" },
+              ],
+              step2: [
+                // Translate Left 5, Down 2
+                { x: -1, y: 3, label: "E'" },
+                { x: -4, y: 2, label: "F'" },
+                { x: -3, y: -1, label: "G'" },
+                { x: 0, y: 0, label: "H'" },
+              ],
+              lines: [],
+            },
+          };
+
+          this.activeScenarioState = 0; // 0=start, 1=step1, 2=step2
+          this.currentPoints = [];
+          this.targetPoints = [];
+
+          // Bind events
+          this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
+          this.canvas.addEventListener("mouseleave", () => {
+            const tooltip = document.getElementById("tooltip");
+            tooltip.style.display = "none";
+          });
+
+          this.draw();
+        }
+
+        // --- Coordinate Logic ---
+        toCanvas(x, y) {
+          return {
+            x: this.origin.x + x * this.gridSize,
+            y: this.origin.y - y * this.gridSize, // Y is inverted in canvas
+          };
+        }
+
+        fromCanvas(pixelX, pixelY) {
+          return {
+            x: (pixelX - this.origin.x) / this.gridSize,
+            y: -(pixelY - this.origin.y) / this.gridSize,
+          };
+        }
+
+        // --- Drawing ---
+        drawGrid() {
+          this.ctx.fillStyle = "white";
+          this.ctx.fillRect(0, 0, this.width, this.height);
+
+          this.ctx.lineWidth = 1;
+          this.ctx.strokeStyle = "#e2e8f0";
+
+          // Minor lines
+          for (let x = 0; x <= this.width; x += this.gridSize) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.height);
+            this.ctx.stroke();
+          }
+          for (let y = 0; y <= this.height; y += this.gridSize) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.width, y);
+            this.ctx.stroke();
+          }
+
+          // Axes
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeStyle = "#475569";
+
+          // Y Axis
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.origin.x, 0);
+          this.ctx.lineTo(this.origin.x, this.height);
+          this.ctx.stroke();
+          // X Axis
+          this.ctx.beginPath();
+          this.ctx.moveTo(0, this.origin.y);
+          this.ctx.lineTo(this.width, this.origin.y);
+          this.ctx.stroke();
+
+          // Numbers
+          this.ctx.fillStyle = "#64748b";
+          this.ctx.font = "16px Arial";
+          this.ctx.textAlign = "center";
+          this.ctx.textBaseline = "middle";
+
+          for (let i = -8; i <= 8; i++) {
+            if (i === 0) continue;
+            let pos = this.toCanvas(i, 0);
+            this.ctx.fillText(i, pos.x, this.origin.y + 20);
+            pos = this.toCanvas(0, i);
+            this.ctx.fillText(i, this.origin.x - 20, pos.y);
+          }
+        }
+
+        drawShape(points, color, type = "fill") {
+          if (points.length === 0) return;
+
+          this.ctx.beginPath();
+          const start = this.toCanvas(points[0].x, points[0].y);
+          this.ctx.moveTo(start.x, start.y);
+
+          points.forEach((p) => {
+            const c = this.toCanvas(p.x, p.y);
+            this.ctx.lineTo(c.x, c.y);
+          });
+          this.ctx.closePath();
+
+          if (type === "fill") {
+            this.ctx.fillStyle = color + "40"; // Transparent
+            this.ctx.fill();
+            this.ctx.strokeStyle = color;
+            this.ctx.lineWidth = 3;
+            this.ctx.setLineDash([]);
+            this.ctx.stroke();
+          } else if (type === "dash") {
+            this.ctx.strokeStyle = color;
+            this.ctx.lineWidth = 2;
+            this.ctx.setLineDash([10, 10]);
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+          }
+
+          // Draw Vertices
+          points.forEach((p) => {
+            const c = this.toCanvas(p.x, p.y);
+            this.ctx.beginPath();
+            this.ctx.arc(c.x, c.y, 6, 0, Math.PI * 2);
+            this.ctx.fillStyle = color;
+            this.ctx.fill();
+
+            // Label
+            if (p.label) {
+              this.ctx.fillStyle = "#1e293b";
+              this.ctx.font = "bold 18px Arial";
+              this.ctx.fillText(p.label, c.x + 15, c.y - 15);
+            }
+          });
+        }
+
+        drawCustomLines(lines) {
+          if (!lines) return;
+          lines.forEach((line) => {
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = line.color || "red";
+            this.ctx.lineWidth = 3;
+            this.ctx.setLineDash([15, 5]);
+
+            if (line.type === "horizontal") {
+              const pt1 = this.toCanvas(-10, line.y);
+              const pt2 = this.toCanvas(10, line.y);
+              this.ctx.moveTo(0, pt1.y);
+              this.ctx.lineTo(this.width, pt2.y);
+
+              // Label
+              this.ctx.fillStyle = line.color;
+              this.ctx.font = "bold 16px Arial";
+              this.ctx.fillText(line.label, this.width - 60, pt1.y - 10);
+            }
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+          });
+        }
+
+        draw() {
+          this.ctx.clearRect(0, 0, this.width, this.height);
+          this.drawGrid();
+
+          if (this.currentTab === "principles") {
+            this.drawShape(this.principleShape, "#3b82f6", "fill");
+          } else {
+            const scenario = this.scenarios[this.currentTab];
+
+            // Draw Goal (Ghost)
+            this.drawShape(scenario.goal, "#22c55e", "dash");
+
+            // Draw Helper Lines
+            this.drawCustomLines(scenario.lines);
+
+            // Draw Current active shape (Animated)
+            this.drawShape(this.currentPoints, "#3b82f6", "fill");
+          }
+        }
+
+        // --- Animation Engine ---
+        animateTo(targetPoints, duration = 1000) {
+          if (this.animating) return;
+          this.animating = true;
+          this.targetPoints = JSON.parse(JSON.stringify(targetPoints)); // Deep copy
+          this.startPoints = JSON.parse(JSON.stringify(this.currentPoints));
+          this.startTime = null;
+          this.animDuration = duration;
+
+          requestAnimationFrame(this.animateStep.bind(this));
+        }
+
+        animateStep(timestamp) {
+          if (!this.startTime) this.startTime = timestamp;
+          const progress = Math.min((timestamp - this.startTime) / this.animDuration, 1);
+
+          // Ease out cubic
+          const ease = 1 - Math.pow(1 - progress, 3);
+
+          // Interpolate points
+          this.currentPoints = this.startPoints.map((p, i) => {
+            return {
+              x: p.x + (this.targetPoints[i].x - p.x) * ease,
+              y: p.y + (this.targetPoints[i].y - p.y) * ease,
+              label: p.label, // Keep label
+            };
+          });
+
+          this.draw();
+
+          if (progress < 1) {
+            requestAnimationFrame(this.animateStep.bind(this));
+          } else {
+            this.animating = false;
+            // Snap to exact values to prevent floating point errors
+            this.currentPoints = JSON.parse(JSON.stringify(this.targetPoints));
+            this.draw();
+          }
+        }
+
+        // --- Interaction Handling ---
+        handleMouseMove(e) {
+          const rect = this.canvas.getBoundingClientRect();
+          const scaleX = this.canvas.width / rect.width;
+          const scaleY = this.canvas.height / rect.height;
+
+          const x = (e.clientX - rect.left) * scaleX;
+          const y = (e.clientY - rect.top) * scaleY;
+
+          const coords = this.fromCanvas(x, y);
+
+          const tooltip = document.getElementById("tooltip");
+          tooltip.style.display = "block";
+          tooltip.style.left = e.clientX - rect.left + 15 + "px";
+          tooltip.style.top = e.clientY - rect.top + "px";
+          tooltip.innerText = `(${Math.round(coords.x)}, ${Math.round(coords.y)})`;
+        }
+      }
+
+      // --- Application Logic ---
+      const app = new GeometryApp("geoCanvas");
+
+      function switchTab(tabId) {
+        app.currentTab = tabId;
+
+        // Update UI
+        ["principles", "q3", "q4"].forEach((t) => {
+          document.getElementById(`tab-${t}`).className = t === tabId ? "tab-active px-4 py-2" : "tab-inactive px-4 py-2";
+          document.getElementById(`controls-${t}`).classList.add("hidden");
+        });
+        document.getElementById(`controls-${tabId}`).classList.remove("hidden");
+
+        // Reset scenarios when entering
+        if (tabId !== "principles") {
+          resetScenario(tabId);
+        } else {
+          app.draw();
+        }
+      }
+
+      // --- Principles Logic ---
+      function setPrincipleShape(type) {
+        if (type === "triangle") {
+          app.principleShape = [
+            { x: 1, y: 1, label: "A" },
+            { x: 4, y: 1, label: "B" },
+            { x: 2, y: 4, label: "C" },
+          ];
+        } else {
+          app.principleShape = [
+            { x: 1, y: 1, label: "A" },
+            { x: 3, y: 1, label: "B" },
+            { x: 3, y: 3, label: "C" },
+            { x: 1, y: 3, label: "D" },
+          ];
+        }
+        app.draw();
+      }
+
+      function applyPrincipleTransform(type) {
+        const newPoints = app.principleShape.map((p) => {
+          let nx = p.x,
+            ny = p.y;
+          if (type === "reflectX") ny = -p.y;
+          if (type === "reflectY") nx = -p.x;
+          if (type === "rotate90") {
+            const temp = nx;
+            nx = ny;
+            ny = -temp; // (y, -x) for 90 CW
+          }
+          if (type === "rotate180") {
+            nx = -nx;
+            ny = -ny;
+          }
+          return { x: nx, y: ny, label: p.label };
+        });
+
+        // Animate transition for principles too!
+        app.currentPoints = JSON.parse(JSON.stringify(app.principleShape));
+        app.targetPoints = newPoints;
+        app.animating = false; // Force reset
+
+        app.startPoints = app.currentPoints;
+        app.startTime = null;
+        app.animDuration = 800;
+
+        function step(timestamp) {
+          if (!app.startTime) app.startTime = timestamp;
+          const progress = Math.min((timestamp - app.startTime) / 800, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+
+          app.principleShape = app.startPoints.map((p, i) => ({
+            x: p.x + (newPoints[i].x - p.x) * ease,
+            y: p.y + (newPoints[i].y - p.y) * ease,
+            label: p.label,
+          }));
+          app.draw();
+
+          if (progress < 1) requestAnimationFrame(step);
+          else {
+            app.principleShape = newPoints;
+            app.draw();
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      function resetPrinciples() {
+        setPrincipleShape("triangle");
+      }
+
+      // --- Scenario Logic ---
+      function runScenario(id, step) {
+        const scenario = app.scenarios[id];
+        let target;
+        const feedbackEl = document.getElementById(`${id}-step${step}-feedback`);
+
+        if (step === 1) {
+          target = scenario.step1;
+          feedbackEl.innerHTML = "Vertices transformed! Next step unlocked.";
+
+          // Enable Step 2 button
+          const btn2 = document.getElementById(`${id}-btn-2`);
+          btn2.disabled = false;
+          btn2.classList.remove("bg-gray-200", "text-gray-400", "cursor-not-allowed");
+          btn2.classList.add("bg-blue-600", "text-white", "hover:bg-blue-700");
+
+          // Update dots
+          document.getElementById(`${id}-dot-2`).classList.remove("bg-gray-300");
+          document.getElementById(`${id}-dot-2`).classList.add("bg-blue-500");
+
+          app.activeScenarioState = 1;
+        } else if (step === 2) {
+          target = scenario.step2;
+          feedbackEl.innerHTML = "<i class='fa-solid fa-check-circle'></i> Target matched perfectly!";
+          app.activeScenarioState = 2;
+        }
+
+        app.animateTo(target);
+      }
+
+      function resetScenario(id) {
+        const scenario = app.scenarios[id];
+        app.currentPoints = JSON.parse(JSON.stringify(scenario.start));
+        app.activeScenarioState = 0;
+
+        // Reset UI
+        document.getElementById(`${id}-step1-feedback`).innerText = "";
+        document.getElementById(`${id}-step2-feedback`).innerText = "";
+
+        const btn2 = document.getElementById(`${id}-btn-2`);
+        btn2.disabled = true;
+        btn2.className = "btn bg-gray-200 text-gray-400 cursor-not-allowed px-4 py-2 rounded shadow w-full";
+
+        document.getElementById(`${id}-dot-2`).className = "absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300";
+
+        app.draw();
+      }
+
+      // Initialize
+      switchTab("principles");
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometry Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      iframe {
+        background: #ffffff;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <div class="min-h-screen flex flex-col">
+      <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div class="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Geometry Dashboard</h1>
+            <p class="text-xs sm:text-sm text-slate-600">
+              Combined labs, simulations, and practice tools (single dashboard).
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              id="openStandalone"
+              class="hidden sm:inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open in new tab
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <aside class="w-full lg:w-80 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 overflow-auto">
+          <nav class="p-3 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible">
+            <button class="geo-nav-btn" data-module="lab" type="button">1) Transformations Lab</button>
+            <button class="geo-nav-btn" data-module="rotations" type="button">2) Rotations: Turn the Graph</button>
+            <button class="geo-nav-btn" data-module="dashboard" type="button">3) Transformations Teaching Dashboard</button>
+            <button class="geo-nav-btn" data-module="angles" type="button">4) Angles, Rays, &amp; Segments</button>
+            <button class="geo-nav-btn" data-module="congruence" type="button">5) Congruence &amp; Reflection (Q8)</button>
+            <button class="geo-nav-btn" data-module="reflections" type="button">6) ReflectEd: Coordinate Reflections</button>
+            <button class="geo-nav-btn" data-module="pattern" type="button">7) Pattern Blocks: Transformations</button>
+          </nav>
+          <div class="px-3 pb-4">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+              Tip: each tool runs inside its own iframe to avoid code collisions. You can also open any tool in a new tab.
+            </div>
+          </div>
+        </aside>
+
+        <main class="flex-1 overflow-hidden">
+          <div class="h-full flex flex-col">
+            <div class="border-b border-slate-200 bg-white px-4 py-3 flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <h2 id="moduleTitle" class="text-base font-semibold truncate">—</h2>
+                <p id="moduleDesc" class="text-xs text-slate-600 truncate">—</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  id="btnReload"
+                  type="button"
+                  class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                  title="Reload the current tool"
+                >
+                  Reload
+                </button>
+              </div>
+            </div>
+
+            <iframe
+              id="moduleFrame"
+              class="flex-1 w-full"
+              title="Geometry module"
+              loading="eager"
+              referrerpolicy="no-referrer"
+              src="modules/transformations-lab.html"
+              style="border: 0"
+            ></iframe>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        const MODULES = {
+          lab: {
+            title: "Transformations Lab",
+            desc: "Point rules + homework stepper (rotation, translation, reflections).",
+            src: "modules/transformations-lab.html",
+          },
+          rotations: {
+            title: "Rotations: Turn the Graph",
+            desc: "Rotate the coordinate plane and watch where a point lands.",
+            src: "modules/rotations-turn-the-graph.html",
+          },
+          dashboard: {
+            title: "Transformations Teaching Dashboard",
+            desc: "First principles + guided scenarios (triangle & quad).",
+            src: "modules/transformations-teaching-dashboard.html",
+          },
+          angles: {
+            title: "Angles, Rays, & Segments",
+            desc: "Concepts + visual lab + practice naming.",
+            src: "modules/angles-rays-segments.html",
+          },
+          congruence: {
+            title: "Congruence & Reflection (Question 8)",
+            desc: "Reflection animation + correspondence (common trap: angle matching).",
+            src: "modules/congruence-reflection-q8.html",
+          },
+          reflections: {
+            title: "ReflectEd: Coordinate Reflections",
+            desc: "Learn → simulate → practice (x-axis vs y-axis reflections).",
+            src: "modules/reflected-coordinate-reflections.html",
+          },
+          pattern: {
+            title: "Pattern Blocks: Transformations",
+            desc: "Rotate and translate a trapezoid to match the target.",
+            src: "modules/pattern-blocks-transformations.html",
+          },
+        };
+
+        const frame = document.getElementById("moduleFrame");
+        const moduleTitle = document.getElementById("moduleTitle");
+        const moduleDesc = document.getElementById("moduleDesc");
+        const openStandalone = document.getElementById("openStandalone");
+        const reloadBtn = document.getElementById("btnReload");
+
+        /** @type {HTMLButtonElement[]} */
+        const navButtons = Array.from(document.querySelectorAll(".geo-nav-btn"));
+
+        function setActiveButton(moduleId) {
+          for (const btn of navButtons) {
+            const isActive = btn.dataset.module === moduleId;
+            btn.className = [
+              "geo-nav-btn",
+              "shrink-0",
+              "text-left",
+              "px-3",
+              "py-2.5",
+              "rounded-xl",
+              "border",
+              "text-sm",
+              "font-semibold",
+              "transition",
+              isActive
+                ? "bg-indigo-50 border-indigo-200 text-indigo-800"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50",
+            ].join(" ");
+            btn.setAttribute("aria-current", isActive ? "page" : "false");
+          }
+        }
+
+        function loadModule(moduleId, { pushHash = true } = {}) {
+          const mod = MODULES[moduleId] || MODULES.lab;
+          moduleTitle.textContent = mod.title;
+          moduleDesc.textContent = mod.desc;
+          frame.src = mod.src;
+          openStandalone.href = mod.src;
+          setActiveButton(moduleId);
+          if (pushHash) window.location.hash = `#${moduleId}`;
+        }
+
+        function loadFromHash() {
+          const hash = (window.location.hash || "").replace(/^#/, "").trim();
+          if (hash && MODULES[hash]) loadModule(hash, { pushHash: false });
+          else loadModule("lab", { pushHash: false });
+        }
+
+        for (const btn of navButtons) {
+          btn.addEventListener("click", () => loadModule(btn.dataset.module || "lab"));
+        }
+
+        reloadBtn.addEventListener("click", () => {
+          try {
+            frame.contentWindow.location.reload();
+          } catch {
+            frame.src = frame.src;
+          }
+        });
+
+        window.addEventListener("hashchange", loadFromHash);
+
+        loadFromHash();
+      })();
+    </script>
+  </body>
+</html>
+

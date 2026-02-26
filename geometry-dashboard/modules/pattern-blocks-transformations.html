@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometric Transformations Lesson</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+
+      /* Animation Classes for First Principles */
+      .demo-box {
+        transition: transform 1s ease-in-out;
+      }
+
+      .translate-hover:hover .demo-box {
+        transform: translate(40px, -20px);
+      }
+
+      .rotate-hover:hover .demo-box {
+        transform: rotate(90deg);
+      }
+
+      .reflect-hover:hover .demo-box {
+        transform: scaleX(-1);
+      }
+
+      canvas {
+        background-color: #f8fafc;
+        border-radius: 12px;
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-slate-800">
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white p-6 shadow-lg">
+      <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-2">Understanding Transformations</h1>
+        <p class="text-indigo-100">From basic concepts to solving Max&apos;s Pattern Block puzzle.</p>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 space-y-12">
+      <!-- SECTION 1: FIRST PRINCIPLES -->
+      <section>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-indigo-100 p-2 rounded-lg text-indigo-600 font-bold">01</div>
+          <h2 class="text-2xl font-bold text-gray-800">First Principles: The "Moves"</h2>
+        </div>
+        <p class="text-gray-600 mb-8 max-w-2xl">
+          Before we solve Max&apos;s puzzle, let&apos;s understand the three ways we can move shapes around without changing their size or shape.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Translation Card -->
+          <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 translate-hover cursor-pointer group">
+            <h3 class="text-xl font-bold text-indigo-600 mb-2">Translation (Slide)</h3>
+            <p class="text-sm text-gray-500 mb-4">Moving a shape from one place to another without turning it.</p>
+            <div class="h-40 bg-gray-50 rounded-lg border border-dashed border-gray-300 relative overflow-hidden flex items-center justify-center">
+              <div class="demo-box w-16 h-16 bg-blue-500 rounded-md shadow-lg flex items-center justify-center text-white font-bold">A</div>
+              <div class="absolute top-2 right-2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                Hover to animate
+              </div>
+            </div>
+          </div>
+
+          <!-- Rotation Card -->
+          <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 rotate-hover cursor-pointer group">
+            <h3 class="text-xl font-bold text-pink-600 mb-2">Rotation (Turn)</h3>
+            <p class="text-sm text-gray-500 mb-4">Spinning a shape around a fixed point (center of rotation).</p>
+            <div class="h-40 bg-gray-50 rounded-lg border border-dashed border-gray-300 relative overflow-hidden flex items-center justify-center">
+              <div class="demo-box w-16 h-16 bg-pink-500 rounded-md shadow-lg flex items-center justify-center text-white font-bold">A</div>
+              <div class="absolute w-2 h-2 bg-black rounded-full"></div>
+            </div>
+          </div>
+
+          <!-- Reflection Card -->
+          <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 reflect-hover cursor-pointer group">
+            <h3 class="text-xl font-bold text-emerald-600 mb-2">Reflection (Flip)</h3>
+            <p class="text-sm text-gray-500 mb-4">Flipping a shape over a line to create a mirror image.</p>
+            <div class="h-40 bg-gray-50 rounded-lg border border-dashed border-gray-300 relative overflow-hidden flex items-center justify-center">
+              <div class="absolute h-full w-0.5 bg-gray-400 dashed"></div>
+              <div class="demo-box w-16 h-16 bg-emerald-500 rounded-tr-[30px] rounded-bl-md shadow-lg flex items-center justify-center text-white font-bold mr-12">
+                R
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: SIMULATION -->
+      <section class="border-t border-gray-200 pt-10">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-indigo-100 p-2 rounded-lg text-indigo-600 font-bold">02</div>
+          <h2 class="text-2xl font-bold text-gray-800">Problem Simulation: Max&apos;s Design</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Instructions / Question -->
+          <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h4 class="font-bold text-gray-900 mb-2">The Question</h4>
+              <p class="text-sm text-gray-600 italic mb-4">
+                "Trapezoids A and B are congruent, and trapezoid A is the preimage of trapezoid B. Describe possible transformation he could have used."
+              </p>
+              <hr class="my-4" />
+              <h4 class="font-bold text-indigo-600 mb-2">The Solution</h4>
+              <p class="text-sm text-gray-700 font-medium">
+                1. <span class="text-pink-600">Rotate</span> trapezoid A clockwise about its center.
+              </p>
+              <p class="text-sm text-gray-700 font-medium mt-2">
+                2. Then <span class="text-blue-600">Translate</span> it up and to the left.
+              </p>
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+              <h3 class="font-bold text-indigo-900 mb-4">Simulation Controls</h3>
+
+              <div class="space-y-3">
+                <button id="btn-reset" class="w-full py-2 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
+                  Reset Positions
+                </button>
+
+                <button
+                  id="btn-step1"
+                  class="w-full py-3 px-4 bg-pink-600 text-white font-bold rounded-lg hover:bg-pink-700 transition flex items-center justify-center gap-2 shadow-sm"
+                >
+                  Step 1: Rotate 180°
+                </button>
+
+                <button
+                  id="btn-step2"
+                  class="w-full py-3 px-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm opacity-50 cursor-not-allowed"
+                  disabled
+                >
+                  Step 2: Translate
+                </button>
+              </div>
+
+              <div id="status-text" class="mt-4 text-center text-sm font-medium text-indigo-800 h-6">Ready to start.</div>
+            </div>
+          </div>
+
+          <!-- Visual Canvas -->
+          <div class="lg:col-span-2">
+            <div class="relative w-full h-[500px] border border-gray-200 rounded-xl overflow-hidden bg-white shadow-inner">
+              <canvas id="geometryCanvas" width="800" height="500" class="w-full h-full"></canvas>
+
+              <!-- Legend Overlay -->
+              <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 text-xs text-gray-600">
+                <div class="flex items-center gap-2 mb-1">
+                  <div class="w-3 h-3 bg-gray-400"></div>
+                  Static Pattern
+                </div>
+                <div class="flex items-center gap-2 mb-1">
+                  <div class="w-3 h-3 bg-indigo-500/30 border border-indigo-500"></div>
+                  Preimage (A)
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 border-2 border-dashed border-gray-400"></div>
+                  Target (B)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Encapsulate everything in an IIFE to prevent global variable collisions
+      (function () {
+        const canvas = document.getElementById("geometryCanvas");
+        const ctx = canvas.getContext("2d");
+        let width, height;
+
+        // Configuration
+        const S = 60; // Side length of the base triangle
+        const H = (S * Math.sqrt(3)) / 2; // Height of triangle rows
+
+        // Colors matching the worksheet style
+        const COLORS = {
+          static: "#9ca3af", // Grey for surrounding blocks
+          target: "#cbd5e1", // Light grey for target slot B
+          active: "#818cf8", // Indigo for the active shape A
+          stroke: "#1f2937", // Dark borders
+        };
+
+        // Animation State
+        let animState = {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          step: 0, // 0=Start, 1=Rotated, 2=Translated
+        };
+
+        function drawTrapezoid(cx, cy, angleDeg, color, label, isDashed = false) {
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate((angleDeg * Math.PI) / 180);
+
+          ctx.beginPath();
+          ctx.moveTo(-S / 2, -H / 2); // Top Left
+          ctx.lineTo(S / 2, -H / 2); // Top Right
+          ctx.lineTo(S, H / 2); // Bottom Right
+          ctx.lineTo(-S, H / 2); // Bottom Left
+          ctx.closePath();
+
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = COLORS.stroke;
+          if (isDashed) ctx.setLineDash([5, 5]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          if (label) {
+            ctx.fillStyle = "#1f2937";
+            ctx.font = "bold 20px Inter";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(label, 0, 0);
+          }
+
+          ctx.restore();
+        }
+
+        function drawScene() {
+          if (!canvas) return;
+          width = canvas.width;
+          height = canvas.height;
+          const centerX = width / 2;
+          const centerY = height / 2;
+
+          ctx.clearRect(0, 0, width, height);
+
+          // Central Triangle Center approx
+          const gapY = centerY - H / 3;
+
+          // Surrounding pattern (static)
+          drawTrapezoid(centerX + S * 1.25, gapY - H / 2, 60, COLORS.static, "");
+          drawTrapezoid(centerX + S * 1.5, gapY + H, 0, COLORS.static, "");
+          drawTrapezoid(centerX - S * 1.5, gapY + H, 0, COLORS.static, "");
+
+          // Target B (ghost)
+          const targetBx = centerX - S * 0.75;
+          const targetBy = gapY - H;
+          drawTrapezoid(targetBx, targetBy, 0, "#e2e8f0", "B", true);
+
+          // Active object A
+          const startAx = centerX;
+          const startAy = gapY + H;
+
+          const currentX = startAx + animState.x;
+          const currentY = startAy + animState.y;
+          const currentRot = 180 + animState.rotation;
+
+          drawTrapezoid(currentX, currentY, currentRot, "rgba(129, 140, 248, 0.9)", "A");
+
+          // Pivot point
+          if (animState.step === 1 || (animState.step === 0 && animState.rotation > 0)) {
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = "#db2777";
+            ctx.fill();
+          }
+        }
+
+        function resetSimulation() {
+          animState = { x: 0, y: 0, rotation: 0, step: 0 };
+          const btn1 = document.getElementById("btn-step1");
+          const btn2 = document.getElementById("btn-step2");
+          const status = document.getElementById("status-text");
+
+          btn1.disabled = false;
+          btn1.classList.remove("opacity-50", "cursor-not-allowed");
+          btn2.disabled = true;
+          btn2.classList.add("opacity-50", "cursor-not-allowed");
+
+          status.innerText = "Positions reset. Ready.";
+          status.className = "mt-4 text-center text-sm font-medium text-indigo-800 h-6";
+          drawScene();
+        }
+
+        function animateStep1() {
+          if (animState.step !== 0) return;
+
+          const btn1 = document.getElementById("btn-step1");
+          btn1.disabled = true;
+          btn1.classList.add("opacity-50", "cursor-not-allowed");
+
+          const status = document.getElementById("status-text");
+          status.innerText = "Rotating 180° clockwise around center...";
+          status.className = "mt-4 text-center text-sm font-bold text-pink-600 h-6";
+
+          let startTimestamp = null;
+          const duration = 1500;
+
+          function step(timestamp) {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            animState.rotation = ease * 180;
+            drawScene();
+
+            if (progress < 1) {
+              window.requestAnimationFrame(step);
+            } else {
+              animState.step = 1;
+              animState.rotation = 180;
+              const btn2 = document.getElementById("btn-step2");
+              btn2.disabled = false;
+              btn2.classList.remove("opacity-50", "cursor-not-allowed");
+              status.innerText = "Rotation complete. Now A is upright.";
+            }
+          }
+
+          window.requestAnimationFrame(step);
+        }
+
+        function animateStep2() {
+          if (animState.step !== 1) return;
+
+          const btn2 = document.getElementById("btn-step2");
+          btn2.disabled = true;
+          btn2.classList.add("opacity-50", "cursor-not-allowed");
+
+          const status = document.getElementById("status-text");
+          status.innerText = "Translating up and to the left...";
+          status.className = "mt-4 text-center text-sm font-bold text-blue-600 h-6";
+
+          const deltaX = -(S * 0.75);
+          const deltaY = -(2 * H);
+
+          let startTimestamp = null;
+          const duration = 1500;
+
+          function step(timestamp) {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            animState.x = deltaX * ease;
+            animState.y = deltaY * ease;
+
+            drawScene();
+
+            if (progress < 1) {
+              window.requestAnimationFrame(step);
+            } else {
+              animState.step = 2;
+              status.innerText = "Transformation Complete! A maps to B.";
+              status.className = "mt-4 text-center text-sm font-bold text-green-600 h-6";
+            }
+          }
+
+          window.requestAnimationFrame(step);
+        }
+
+        document.getElementById("btn-reset").addEventListener("click", resetSimulation);
+        document.getElementById("btn-step1").addEventListener("click", animateStep1);
+        document.getElementById("btn-step2").addEventListener("click", animateStep2);
+
+        drawScene();
+        window.addEventListener("resize", drawScene);
+      })();
+    </script>
+  </body>
+</html>
+

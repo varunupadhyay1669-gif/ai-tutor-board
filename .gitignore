@@ -1,0 +1,4 @@
+transcript_intel/data/
+**/__pycache__/
+*.sqlite3
+

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Transcript Intelligence Dashboard</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title">Transcript Intelligence</div>
+        <div class="brand-subtitle">Longitudinal growth engine for 1:1 tutoring</div>
+      </div>
+      <div class="topbar-actions">
+        <label class="segmented" aria-label="View mode">
+          <input type="radio" name="viewMode" value="tutor" checked />
+          <span>Tutor</span>
+          <input type="radio" name="viewMode" value="parent" />
+          <span>Parent</span>
+        </label>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card">
+        <h2>Students</h2>
+        <div class="row">
+          <select id="studentSelect" class="input" aria-label="Select student"></select>
+          <button id="btnRefresh" class="btn">Refresh</button>
+        </div>
+        <details class="details">
+          <summary>Create student</summary>
+          <div class="grid2">
+            <label class="field">
+              <span>Name</span>
+              <input id="newName" class="input" placeholder="Student name" />
+            </label>
+            <label class="field">
+              <span>Grade</span>
+              <input id="newGrade" class="input" placeholder="e.g., 7" />
+            </label>
+            <label class="field">
+              <span>Curriculum</span>
+              <input id="newCurriculum" class="input" placeholder="e.g., Common Core" />
+            </label>
+            <label class="field">
+              <span>Target exam (optional)</span>
+              <input id="newExam" class="input" placeholder="e.g., SAT, ACT, SSAT" />
+            </label>
+          </div>
+          <div class="row">
+            <button id="btnCreateStudent" class="btn primary">Create</button>
+            <div id="createStudentStatus" class="muted"></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>Trial transcript → Goal tree + topic map</h2>
+        <div class="grid2">
+          <label class="field">
+            <span>Student name (for trial)</span>
+            <input id="trialName" class="input" placeholder="Student name" />
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input id="trialDate" class="input" type="date" />
+          </label>
+          <label class="field">
+            <span>Grade</span>
+            <input id="trialGrade" class="input" placeholder="e.g., 8" />
+          </label>
+          <label class="field">
+            <span>Curriculum</span>
+            <input id="trialCurriculum" class="input" placeholder="e.g., Common Core / AoPS" />
+          </label>
+          <label class="field">
+            <span>Target exam (optional)</span>
+            <input id="trialExam" class="input" placeholder="e.g., SAT" />
+          </label>
+        </div>
+        <label class="field">
+          <span>Trial transcript text</span>
+          <textarea id="trialTranscript" class="input textarea" placeholder="Paste trial transcript here (Parent/Tutor/Student lines are helpful)."></textarea>
+        </label>
+        <div class="row">
+          <button id="btnProcessTrial" class="btn primary">Process trial</button>
+          <div id="trialStatus" class="muted"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Lesson transcript → Mastery updates + next targets</h2>
+        <div class="grid2">
+          <label class="field">
+            <span>Selected student</span>
+            <div id="selectedStudentLabel" class="pill">None</div>
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input id="sessionDate" class="input" type="date" />
+          </label>
+        </div>
+        <label class="field">
+          <span>Session transcript text</span>
+          <textarea id="sessionTranscript" class="input textarea" placeholder="Paste session transcript here. Include speaker labels if possible (Tutor:, Student:)."></textarea>
+        </label>
+        <div class="row">
+          <button id="btnProcessSession" class="btn primary">Process session</button>
+          <div id="sessionStatus" class="muted"></div>
+        </div>
+      </section>
+
+      <section class="card" id="dashboardCard">
+        <div class="row space-between">
+          <h2>Dashboard</h2>
+          <div class="muted" id="dashboardMeta"></div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-block">
+            <h3>Goals</h3>
+            <div id="goals"></div>
+          </div>
+          <div class="dash-block">
+            <h3>Recommended next targets</h3>
+            <div id="nextTargets"></div>
+          </div>
+          <div class="dash-block">
+            <h3>Topic mastery heatmap</h3>
+            <div id="topics"></div>
+          </div>
+          <div class="dash-block">
+            <h3>Mental block alerts</h3>
+            <div id="mentalBlocks"></div>
+          </div>
+          <div class="dash-block span2">
+            <h3>Growth timeline</h3>
+            <div id="timelineChart"></div>
+          </div>
+          <div class="dash-block span2">
+            <h3>Sessions</h3>
+            <div id="sessions"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="muted">
+        Local-only prototype. Scoring is explainable and adjustable; swap the extractor to plug in a different model later.
+      </div>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
+

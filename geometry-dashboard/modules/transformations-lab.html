@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometry Lab: Transformations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f3f4f6;
+      }
+      canvas {
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        cursor: crosshair;
+      }
+      .tab-active {
+        background-color: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+      }
+      .tab-inactive {
+        background-color: #ffffff;
+        color: #374151;
+        border-color: #d1d5db;
+      }
+      .tab-inactive:hover {
+        background-color: #f9fafb;
+      }
+    </style>
+  </head>
+  <body class="text-gray-800 pb-20">
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+            />
+          </svg>
+          Geometry Lab
+        </h1>
+        <div class="space-x-4 text-sm font-medium">
+          <a href="#playground" class="hover:text-indigo-200">1. Concept Playground</a>
+          <a href="#homework" class="hover:text-indigo-200">2. Homework Solver</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-8 space-y-12">
+      <!-- PART 1: INTERACTIVE PLAYGROUND -->
+      <section id="playground" class="scroll-mt-24">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded">Part 1</div>
+          <h2 class="text-2xl font-bold text-gray-800">Concept Playground</h2>
+        </div>
+        <p class="mb-6 text-gray-600 max-w-2xl">
+          Select a transformation rule below to open its simulation. Enter any coordinates to see how the rule applies
+          to a point.
+        </p>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 flex flex-col lg:flex-row">
+          <!-- Sidebar Controls -->
+          <div class="lg:w-1/3 bg-gray-50 border-r border-gray-200 p-6 flex flex-col gap-6">
+            <!-- Tabs -->
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                onclick="setMode('rotCW')"
+                id="tab-rotCW"
+                class="px-3 py-2 text-sm font-medium rounded border transition text-center tab-active"
+              >
+                ⟳ Rot 90° CW
+              </button>
+              <button
+                onclick="setMode('trans')"
+                id="tab-trans"
+                class="px-3 py-2 text-sm font-medium rounded border transition text-center tab-inactive"
+              >
+                ↔ Translate
+              </button>
+              <button
+                onclick="setMode('refX')"
+                id="tab-refX"
+                class="px-3 py-2 text-sm font-medium rounded border transition text-center tab-inactive"
+              >
+                ⬍ Reflect X
+              </button>
+              <button
+                onclick="setMode('rotCCW')"
+                id="tab-rotCCW"
+                class="px-3 py-2 text-sm font-medium rounded border transition text-center tab-inactive"
+              >
+                ⟲ Rot 90° CCW
+              </button>
+            </div>
+
+            <!-- Dynamic Input Panel -->
+            <div id="controls-panel" class="bg-white p-4 rounded border border-gray-200 shadow-sm">
+              <!-- Common Inputs -->
+              <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Test Point (x, y)</label>
+                <div class="flex gap-2">
+                  <input
+                    type="number"
+                    id="input-x"
+                    value="3"
+                    class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500"
+                    onchange="updatePlayground()"
+                  />
+                  <input
+                    type="number"
+                    id="input-y"
+                    value="2"
+                    class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500"
+                    onchange="updatePlayground()"
+                  />
+                </div>
+              </div>
+
+              <!-- Translation Specifics -->
+              <div id="translation-controls" class="hidden space-y-4 pt-4 border-t">
+                <div>
+                  <label class="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                    <span>Horizontal (x)</span>
+                    <span id="val-dx" class="text-indigo-600">0</span>
+                  </label>
+                  <input
+                    type="range"
+                    id="slider-dx"
+                    min="-5"
+                    max="5"
+                    value="0"
+                    step="1"
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="updatePlayground()"
+                  />
+                  <p id="text-dx" class="text-xs text-gray-500 mt-1">No change</p>
+                </div>
+                <div>
+                  <label class="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                    <span>Vertical (y)</span>
+                    <span id="val-dy" class="text-indigo-600">0</span>
+                  </label>
+                  <input
+                    type="range"
+                    id="slider-dy"
+                    min="-5"
+                    max="5"
+                    value="0"
+                    step="1"
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="updatePlayground()"
+                  />
+                  <p id="text-dy" class="text-xs text-gray-500 mt-1">No change</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Explanation Box -->
+            <div class="mt-auto bg-indigo-50 p-4 rounded border border-indigo-100">
+              <h4 class="font-bold text-indigo-900 mb-2">Rule:</h4>
+              <p id="rule-formula" class="font-mono text-lg text-indigo-700 mb-2">(x, y) → (y, -x)</p>
+              <p id="rule-desc" class="text-sm text-indigo-800">Switch coordinates, change sign of new y.</p>
+
+              <div class="mt-3 pt-3 border-t border-indigo-200">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-bold">Start:</span>
+                  <span id="res-start" class="font-mono">(3, 2)</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm mt-1">
+                  <span class="font-bold">End:</span>
+                  <span id="res-end" class="font-mono font-bold text-red-600">(2, -3)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas -->
+          <div class="lg:w-2/3 bg-gray-50 p-8 flex justify-center items-center relative">
+            <canvas id="playgroundCanvas" width="500" height="500" class="bg-white shadow-sm rounded max-w-full"></canvas>
+            <div class="absolute bottom-4 right-8 bg-white/90 p-2 rounded text-xs shadow border text-gray-500">
+              Interactive Simulation
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 2: HOMEWORK SOLVER -->
+      <section id="homework" class="scroll-mt-24 pt-8 border-t border-gray-300">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded">Part 2</div>
+          <h2 class="text-2xl font-bold text-gray-800">Homework Problem Solver</h2>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+          <!-- Controls -->
+          <div class="lg:w-1/3 space-y-4">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <h3 class="font-bold text-gray-700 mb-3 uppercase text-xs tracking-wider">Select Question</h3>
+              <div class="flex flex-col gap-2 mb-6">
+                <button
+                  onclick="loadHomework(1)"
+                  id="btn-hw1"
+                  class="text-left p-3 rounded border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold shadow-sm transition"
+                >
+                  1. Triangle Transformation
+                  <span class="block text-xs font-normal opacity-75 mt-1">Rotate 90° CW → Translate</span>
+                </button>
+                <button
+                  onclick="loadHomework(2)"
+                  id="btn-hw2"
+                  class="text-left p-3 rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition"
+                >
+                  2. Rhombus Transformation
+                  <span class="block text-xs font-normal opacity-75 mt-1">Reflect X → Rotate 90° CCW</span>
+                </button>
+              </div>
+
+              <div class="border-t pt-4">
+                <div class="flex justify-between items-center mb-2">
+                  <h3 class="font-bold text-gray-800">Step: <span id="hw-step-num">0</span>/2</h3>
+                  <span id="hw-step-title" class="text-xs font-bold px-2 py-1 bg-gray-200 rounded text-gray-600"
+                    >Start</span
+                  >
+                </div>
+                <p id="hw-desc" class="text-sm text-gray-600 mb-4 min-h-[40px]">Original position.</p>
+
+                <div class="flex gap-2">
+                  <button onclick="prevHwStep()" class="flex-1 bg-gray-100 text-gray-600 py-2 rounded border hover:bg-gray-200">
+                    Back
+                  </button>
+                  <button
+                    onclick="nextHwStep()"
+                    class="flex-1 bg-green-600 text-white py-2 rounded shadow hover:bg-green-700 font-bold"
+                  >
+                    Next Step
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coordinates Table -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <h3 class="font-bold text-gray-700 mb-3 border-b pb-2">Coordinates</h3>
+              <div id="hw-coords" class="space-y-2 text-sm font-mono"></div>
+            </div>
+          </div>
+
+          <!-- Canvas -->
+          <div class="lg:w-2/3 bg-white rounded-xl shadow-lg p-4 flex justify-center items-center">
+            <canvas id="homeworkCanvas" width="600" height="600" class="max-w-full h-auto"></canvas>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // ==========================================
+      // SHARED UTILS
+      // ==========================================
+      const GRID_SIZE = 40;
+
+      function drawGrid(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+
+        // Background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+
+        const cx = width / 2;
+        const cy = height / 2;
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#e5e7eb"; // Light gray grid
+
+        // Grid lines
+        for (let x = 0; x <= width; x += GRID_SIZE) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= height; y += GRID_SIZE) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        // Axes
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#374151"; // Dark gray axis
+
+        // X Axis
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(width, cy);
+        ctx.stroke();
+        // Y Axis
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, height);
+        ctx.stroke();
+
+        // Numbers
+        ctx.font = "10px sans-serif";
+        ctx.fillStyle = "#9ca3af";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        for (let x = -6; x <= 6; x++) {
+          if (x === 0) continue;
+          ctx.fillText(x, cx + x * GRID_SIZE, cy + 15);
+        }
+        for (let y = -6; y <= 6; y++) {
+          if (y === 0) continue;
+          ctx.fillText(y, cx - 15, cy - y * GRID_SIZE);
+        }
+      }
+
+      function toCanvas(x, y, canvas) {
+        return {
+          x: canvas.width / 2 + x * GRID_SIZE,
+          y: canvas.height / 2 - y * GRID_SIZE,
+        };
+      }
+
+      function drawPoint(ctx, x, y, label, color) {
+        const pos = toCanvas(x, y, ctx.canvas);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#1f2937";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText(label, pos.x + 10, pos.y - 10);
+      }
+
+      function drawPolygon(ctx, points, fillColor, strokeColor, isDashed = false) {
+        if (!points || points.length === 0) return;
+        const cPoints = points.map((p) => toCanvas(p.x, p.y, ctx.canvas));
+
+        ctx.beginPath();
+        ctx.moveTo(cPoints[0].x, cPoints[0].y);
+        for (let i = 1; i < cPoints.length; i++) ctx.lineTo(cPoints[i].x, cPoints[i].y);
+        ctx.closePath();
+
+        ctx.save();
+        if (isDashed) ctx.setLineDash([5, 5]);
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = strokeColor;
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw vertices labels
+        cPoints.forEach((cp, i) => {
+          ctx.fillStyle = strokeColor;
+          ctx.beginPath();
+          ctx.arc(cp.x, cp.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+          // Simple label offset
+          const p = points[i];
+          const ox = p.x < 0 ? -15 : 15;
+          const oy = p.y < 0 ? 15 : -15;
+          ctx.fillStyle = "#374151";
+          ctx.font = "11px sans-serif";
+          ctx.fillText(p.label || "", cp.x + ox, cp.y + oy);
+        });
+      }
+
+      // ==========================================
+      // PART 1: PLAYGROUND LOGIC
+      // ==========================================
+      let playMode = "rotCW";
+      const playCanvas = document.getElementById("playgroundCanvas");
+      const playCtx = playCanvas.getContext("2d");
+
+      function setMode(mode) {
+        playMode = mode;
+        // Update tabs
+        ["rotCW", "trans", "refX", "rotCCW"].forEach((m) => {
+          const el = document.getElementById(`tab-${m}`);
+          if (m === mode) {
+            el.className = "px-3 py-2 text-sm font-medium rounded border transition text-center tab-active";
+          } else {
+            el.className = "px-3 py-2 text-sm font-medium rounded border transition text-center tab-inactive";
+          }
+        });
+
+        // Toggle Controls
+        if (mode === "trans") {
+          document.getElementById("translation-controls").classList.remove("hidden");
+        } else {
+          document.getElementById("translation-controls").classList.add("hidden");
+        }
+
+        updatePlayground();
+      }
+
+      function updatePlayground() {
+        const x = parseInt(document.getElementById("input-x").value) || 0;
+        const y = parseInt(document.getElementById("input-y").value) || 0;
+
+        drawGrid(playCtx, playCanvas.width, playCanvas.height);
+
+        // Shape definition (Flag-like shape to see orientation)
+        // We'll treat x,y as the "Anchor" point (Red)
+
+        let startPoints = [
+          { x: x, y: y, label: "P" },
+          { x: x + 1, y: y, label: "" },
+          { x: x, y: y + 2, label: "Q" }, // Simple L shape
+        ];
+
+        // Draw Start
+        drawPolygon(playCtx, startPoints, "rgba(99, 102, 241, 0.2)", "#4f46e5", true); // Indigo
+        drawPoint(playCtx, x, y, `(${x},${y})`, "#4f46e5");
+
+        // Calculate End
+        let endPoints = [];
+        let ruleText = "";
+        let ruleFormula = "";
+        let endX = x,
+          endY = y;
+
+        if (playMode === "rotCW") {
+          ruleFormula = "(x, y) → (y, -x)";
+          ruleText = "Rotate 90° Clockwise: Switch numbers, flip new Y sign.";
+          endPoints = startPoints.map((p) => ({ x: p.y, y: -p.x, label: p.label ? p.label + "'" : "" }));
+          endX = y;
+          endY = -x;
+        } else if (playMode === "rotCCW") {
+          ruleFormula = "(x, y) → (-y, x)";
+          ruleText = "Rotate 90° Counter-Clockwise: Switch numbers, flip new X sign.";
+          endPoints = startPoints.map((p) => ({ x: -p.y, y: p.x, label: p.label ? p.label + "'" : "" }));
+          endX = -y;
+          endY = x;
+        } else if (playMode === "refX") {
+          ruleFormula = "(x, y) → (x, -y)";
+          ruleText = "Reflect over X-axis: Keep X, flip sign of Y.";
+          endPoints = startPoints.map((p) => ({ x: p.x, y: -p.y, label: p.label ? p.label + "'" : "" }));
+          endX = x;
+          endY = -y;
+
+          // Highlight Axis
+          const cy = playCanvas.height / 2;
+          playCtx.lineWidth = 4;
+          playCtx.strokeStyle = "rgba(239, 68, 68, 0.3)";
+          playCtx.beginPath();
+          playCtx.moveTo(0, cy);
+          playCtx.lineTo(playCanvas.width, cy);
+          playCtx.stroke();
+        } else if (playMode === "trans") {
+          const dx = parseInt(document.getElementById("slider-dx").value);
+          const dy = parseInt(document.getElementById("slider-dy").value);
+
+          // Update text hints
+          document.getElementById("val-dx").innerText = dx > 0 ? `+${dx}` : dx;
+          document.getElementById("val-dy").innerText = dy > 0 ? `+${dy}` : dy;
+
+          const dirX = dx > 0 ? "Right" : dx < 0 ? "Left" : "No shift";
+          const dirY = dy > 0 ? "Up" : dy < 0 ? "Down" : "No shift";
+
+          document.getElementById("text-dx").innerText =
+            dx !== 0 ? `Shift ${dirX} by ${Math.abs(dx)}` : "Horizontal stays same";
+          document.getElementById("text-dy").innerText =
+            dy !== 0 ? `Shift ${dirY} by ${Math.abs(dy)}` : "Vertical stays same";
+
+          ruleFormula = `(x, y) → (x ${dx >= 0 ? "+" : ""}${dx}, y ${dy >= 0 ? "+" : ""}${dy})`;
+          ruleText = `Translation: ${dirX} ${Math.abs(dx)}, ${dirY} ${Math.abs(dy)}.`;
+
+          endPoints = startPoints.map((p) => ({ x: p.x + dx, y: p.y + dy, label: p.label ? p.label + "'" : "" }));
+          endX = x + dx;
+          endY = y + dy;
+
+          // Draw vector arrow
+          const p1 = toCanvas(x, y, playCanvas);
+          const p2 = toCanvas(endX, endY, playCanvas);
+          playCtx.beginPath();
+          playCtx.moveTo(p1.x, p1.y);
+          playCtx.lineTo(p2.x, p2.y);
+          playCtx.strokeStyle = "rgba(0,0,0,0.2)";
+          playCtx.setLineDash([2, 2]);
+          playCtx.stroke();
+          playCtx.setLineDash([]);
+        }
+
+        // Draw End
+        drawPolygon(playCtx, endPoints, "rgba(239, 68, 68, 0.2)", "#dc2626"); // Red
+        drawPoint(playCtx, endX, endY, `(${endX},${endY})`, "#dc2626");
+
+        // Update Text
+        document.getElementById("rule-formula").innerText = ruleFormula;
+        document.getElementById("rule-desc").innerText = ruleText;
+        document.getElementById("res-start").innerText = `(${x}, ${y})`;
+        document.getElementById("res-end").innerText = `(${endX}, ${endY})`;
+      }
+
+      // ==========================================
+      // PART 2: HOMEWORK LOGIC (Existing)
+      // ==========================================
+      const hwCanvas = document.getElementById("homeworkCanvas");
+      const hwCtx = hwCanvas.getContext("2d");
+      let hwProblem = 1;
+      let hwStep = 0;
+
+      const hwData = {
+        1: {
+          points: ["A", "B", "C"],
+          step0: [
+            { x: -4, y: -2, label: "A" },
+            { x: -2, y: -1, label: "B" },
+            { x: -1, y: -4, label: "C" },
+          ],
+          step1: [
+            { x: -2, y: 4, label: "A'" },
+            { x: -1, y: 2, label: "B'" },
+            { x: -4, y: 1, label: "C'" },
+          ],
+          step2: [
+            { x: 1, y: 3, label: "A''" },
+            { x: 2, y: 1, label: "B''" },
+            { x: -1, y: 0, label: "C''" },
+          ],
+          stepsInfo: [
+            { title: "Start", desc: "Original Triangle ABC. Point A is at (-4, -2)." },
+            { title: "Rotate 90° CW", desc: "Rule: (x, y) → (y, -x). A(-4, -2) becomes A'(-2, 4)." },
+            { title: "Translate (+3, -1)", desc: "Rule: (x+3, y-1). Right 3, Down 1. A'(-2, 4) becomes A''(1, 3)." },
+          ],
+        },
+        2: {
+          points: ["M", "N", "K", "L"],
+          step0: [
+            { x: 4, y: -3, label: "M" },
+            { x: 2, y: -1, label: "N" },
+            { x: 0, y: -3, label: "K" },
+            { x: 2, y: -5, label: "L" },
+          ],
+          step1: [
+            { x: 4, y: 3, label: "M'" },
+            { x: 2, y: 1, label: "N'" },
+            { x: 0, y: 3, label: "K'" },
+            { x: 2, y: 5, label: "L'" },
+          ],
+          step2: [
+            { x: -3, y: 4, label: "M''" },
+            { x: -1, y: 2, label: "N''" },
+            { x: -3, y: 0, label: "K''" },
+            { x: -5, y: 2, label: "L''" },
+          ],
+          stepsInfo: [
+            { title: "Start", desc: "Original Rhombus. Point M is at (4, -3)." },
+            { title: "Reflect X-Axis", desc: "Rule: (x, y) → (x, -y). Flip y sign. M(4, -3) becomes M'(4, 3)." },
+            { title: "Rotate 90° CCW", desc: "Rule: (x, y) → (-y, x). Swap and flip first. M'(4, 3) becomes M''(-3, 4)." },
+          ],
+        },
+      };
+
+      function loadHomework(id) {
+        hwProblem = id;
+        hwStep = 0;
+        // Update Buttons
+        document.getElementById("btn-hw1").className =
+          id === 1
+            ? "text-left p-3 rounded border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold shadow-sm transition"
+            : "text-left p-3 rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition";
+        document.getElementById("btn-hw2").className =
+          id === 2
+            ? "text-left p-3 rounded border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold shadow-sm transition"
+            : "text-left p-3 rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition";
+        updateHomework();
+      }
+
+      function nextHwStep() {
+        if (hwStep < 2) {
+          hwStep++;
+          updateHomework();
+        }
+      }
+      function prevHwStep() {
+        if (hwStep > 0) {
+          hwStep--;
+          updateHomework();
+        }
+      }
+
+      function updateHomework() {
+        const data = hwData[hwProblem];
+        const info = data.stepsInfo[hwStep];
+
+        // Text
+        document.getElementById("hw-step-num").innerText = hwStep;
+        document.getElementById("hw-step-title").innerText = info.title;
+        document.getElementById("hw-desc").innerText = info.desc;
+
+        // Draw
+        drawGrid(hwCtx, hwCanvas.width, hwCanvas.height);
+
+        // Logic:
+        // Step 0: Draw S0 (Solid)
+        // Step 1: Draw S0 (Dashed), S1 (Solid)
+        // Step 2: Draw S0 (Faint), S1 (Dashed), S2 (Solid)
+
+        if (hwStep === 0) {
+          drawPolygon(hwCtx, data.step0, "rgba(107, 114, 128, 0.2)", "#4b5563");
+        } else if (hwStep === 1) {
+          drawPolygon(hwCtx, data.step0, "rgba(107, 114, 128, 0.1)", "#9ca3af", true);
+          drawPolygon(hwCtx, data.step1, "rgba(59, 130, 246, 0.2)", "#2563eb");
+        } else if (hwStep === 2) {
+          drawPolygon(hwCtx, data.step0, "rgba(107, 114, 128, 0.05)", "#e5e7eb", true);
+          drawPolygon(hwCtx, data.step1, "rgba(59, 130, 246, 0.1)", "#93c5fd", true);
+          drawPolygon(hwCtx, data.step2, "rgba(220, 38, 38, 0.2)", "#dc2626");
+        }
+
+        // Table
+        let tableHtml = "";
+        for (let i = 0; i < data.step0.length; i++) {
+          const p0 = data.step0[i];
+          const p1 = data.step1[i];
+          const p2 = data.step2[i];
+
+          let row = `<div class="flex justify-between items-center bg-gray-50 p-2 rounded border mb-1">`;
+          row += `<span class="text-gray-500 w-1/3">${p0.label} (${p0.x},${p0.y})</span>`;
+
+          if (hwStep >= 1) {
+            row += `<span class="text-blue-600 font-bold w-1/3 text-center">→ ${p1.label} (${p1.x},${p1.y})</span>`;
+          } else {
+            row += `<span class="w-1/3"></span>`;
+          }
+
+          if (hwStep >= 2) {
+            row += `<span class="text-red-600 font-bold w-1/3 text-right">→ ${p2.label} (${p2.x},${p2.y})</span>`;
+          } else {
+            row += `<span class="w-1/3"></span>`;
+          }
+
+          row += `</div>`;
+          tableHtml += row;
+        }
+        document.getElementById("hw-coords").innerHTML = tableHtml;
+      }
+
+      // Init
+      updatePlayground();
+      updateHomework();
+    </script>
+  </body>
+</html>
+

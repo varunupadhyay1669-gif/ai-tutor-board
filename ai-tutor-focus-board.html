@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tutor Command Center — 1000X</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #06090f;
+      --bg2: #0c1420;
+      --surface: rgba(14, 22, 36, 0.85);
+      --surface2: rgba(18, 28, 46, 0.9);
+      --glass: rgba(255, 255, 255, 0.04);
+      --text: #f0f4ff;
+      --muted: #8a9ec0;
+      --border: rgba(100, 140, 200, 0.2);
+      --glow-teal: #22d3a7;
+      --glow-blue: #3b82f6;
+      --glow-violet: #8b5cf6;
+      --glow-amber: #f59e0b;
+      --glow-rose: #f43f5e;
+      --glow-emerald: #10b981;
+      --radius: 16px;
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 15% 5%, rgba(34, 211, 167, 0.15), transparent 40%), radial-gradient(ellipse at 85% 10%, rgba(139, 92, 246, 0.12), transparent 35%), radial-gradient(ellipse at 80% 90%, rgba(244, 63, 94, 0.1), transparent 40%), radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.05), transparent 60%);
+      z-index: 0;
+      pointer-events: none
+    }
+
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 24px 20px 80px
+    }
+
+    /* NAV */
+    .side-nav {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .side-nav a {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all .3s;
+      text-decoration: none
+    }
+
+    .side-nav a:hover,
+    .side-nav a.active {
+      background: var(--glow-teal);
+      box-shadow: 0 0 12px var(--glow-teal);
+      transform: scale(1.3)
+    }
+
+    .side-nav .nav-tip {
+      display: none;
+      position: absolute;
+      right: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .side-nav a:hover .nav-tip {
+      display: block
+    }
+
+    /* SECTION */
+    .section {
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all .6s cubic-bezier(.16, 1, .3, 1)
+    }
+
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .section-label {
+      font-size: .68rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--glow-teal);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .section-label::before {
+      content: '';
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--glow-teal), transparent);
+      border-radius: 2px
+    }
+
+    /* HERO */
+    .hero {
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 36px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(34, 211, 167, 0.05)), var(--surface);
+      position: relative;
+      overflow: hidden
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent 70%);
+      animation: pulse 8s ease-in-out infinite alternate
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.08;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, var(--glow-teal) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      max-width: 22ch
+    }
+
+    .hero>p {
+      color: var(--muted);
+      margin-top: 12px;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      max-width: 70ch
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 24px
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: rgba(6, 9, 15, 0.6);
+      backdrop-filter: blur(8px);
+      transition: border-color .3s
+    }
+
+    .stat:hover {
+      border-color: var(--glow-teal)
+    }
+
+    .stat strong {
+      font-size: 1.3rem;
+      display: block;
+      background: linear-gradient(90deg, var(--glow-teal), var(--glow-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text
+    }
+
+    .stat span {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.3
+    }
+
+    /* PANELS & CARDS */
+    .grid {
+      display: grid;
+      gap: 16px
+    }
+
+    .g2 {
+      grid-template-columns: repeat(2, 1fr)
+    }
+
+    .g3 {
+      grid-template-columns: repeat(3, 1fr)
+    }
+
+    .g4 {
+      grid-template-columns: repeat(4, 1fr)
+    }
+
+    .g7-5 {
+      grid-template-columns: 7fr 5fr
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      background: var(--surface2);
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s, transform .3s
+    }
+
+    .panel:hover {
+      border-color: rgba(100, 140, 200, 0.35);
+      transform: translateY(-2px)
+    }
+
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--glow-teal), var(--glow-blue), var(--glow-violet));
+      opacity: .6
+    }
+
+    .panel h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px
+    }
+
+    .panel>p.sub {
+      color: var(--muted);
+      font-size: .82rem;
+      margin-bottom: 14px;
+      line-height: 1.4
+    }
+
+    /* TOOL CARDS */
+    .tool {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: rgba(6, 9, 15, 0.5);
+      transition: all .3s
+    }
+
+    .tool:hover {
+      border-color: var(--glow-blue);
+      background: rgba(59, 130, 246, 0.05)
+    }
+
+    .tool .icon {
+      font-size: 1.3rem;
+      margin-bottom: 6px
+    }
+
+    .tool h4 {
+      font-size: .85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #e2eaff
+    }
+
+    .tool p {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.35
+    }
+
+    .tool .ai-tag {
+      display: inline-block;
+      font-size: .62rem;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd;
+      margin-top: 6px;
+      letter-spacing: .04em;
+      text-transform: uppercase
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      flex-wrap: wrap
+    }
+
+    .tab {
+      padding: 6px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .25s
+    }
+
+    .tab:hover {
+      border-color: var(--glow-blue);
+      color: var(--text)
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.15));
+      border-color: var(--glow-blue);
+      color: #fff
+    }
+
+    /* PROMPT CARDS */
+    .prompt {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(6, 9, 15, 0.6);
+      cursor: pointer;
+      transition: all .25s;
+      position: relative
+    }
+
+    .prompt:hover {
+      border-color: var(--glow-amber);
+      transform: translateY(-2px)
+    }
+
+    .prompt h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--glow-amber);
+      margin-bottom: 4px
+    }
+
+    .prompt p {
+      font-size: .76rem;
+      color: var(--muted);
+      line-height: 1.35;
+      font-family: var(--mono)
+    }
+
+    .prompt .cat {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: .58rem;
+      padding: 2px 6px;
+      border-radius: 99px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: var(--glow-amber);
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    /* INNOVATION CARDS */
+    .inno {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: linear-gradient(150deg, rgba(10, 16, 28, 0.95), rgba(14, 24, 40, 0.9));
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all .3s
+    }
+
+    .inno:hover {
+      border-color: var(--glow-violet);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1)
+    }
+
+    .inno .tier {
+      width: fit-content;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 600
+    }
+
+    .tier.now {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--glow-emerald)
+    }
+
+    .tier.next {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: var(--glow-blue)
+    }
+
+    .tier.moon {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: var(--glow-violet)
+    }
+
+    .inno h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .inno>p {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.4;
+      flex: 1
+    }
+
+    .tech-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px
+    }
+
+    .tech {
+      font-size: .62rem;
+      padding: 3px 8px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: #b0c4e8;
+      letter-spacing: .03em
+    }
+
+    /* AGENT PIPELINE */
+    .pipeline {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 8px
+    }
+
+    .agent-card {
+      flex: 1;
+      min-width: 160px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--surface);
+      text-align: center;
+      position: relative;
+      transition: all .3s
+    }
+
+    .agent-card:hover {
+      border-color: var(--glow-blue);
+      transform: translateY(-2px)
+    }
+
+    .agent-card .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--glow-teal), var(--glow-blue));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      margin-bottom: 8px
+    }
+
+    .agent-card h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: 4px
+    }
+
+    .agent-card p {
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.3
+    }
+
+    .agent-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--glow-teal);
+      font-size: 1.2rem;
+      padding: 0 4px;
+      opacity: .5
+    }
+
+    /* CHECKLIST */
+    .check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(6, 9, 15, 0.4);
+      font-size: .84rem;
+      color: #c8d8f0;
+      line-height: 1.35;
+      transition: background .2s
+    }
+
+    .check:hover {
+      background: rgba(59, 130, 246, 0.04)
+    }
+
+    .check input {
+      margin-top: 3px;
+      accent-color: var(--glow-teal);
+      flex-shrink: 0
+    }
+
+    .danger {
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 12px;
+      padding: 14px;
+      background: rgba(244, 63, 94, 0.05);
+      color: #fda4af;
+      font-size: .82rem;
+      line-height: 1.4;
+      margin-top: 12px
+    }
+
+    .focus-bar {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.08), rgba(34, 211, 167, 0.06));
+      margin-top: 16px
+    }
+
+    .focus-bar strong {
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--glow-blue);
+      display: block;
+      margin-bottom: 6px
+    }
+
+    .focus-bar p {
+      font-size: .92rem;
+      color: #e2eaff;
+      line-height: 1.35
+    }
+
+    /* BUTTONS */
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 16px;
+      background: rgba(20, 32, 52, 0.9);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .btn:hover {
+      border-color: var(--glow-teal);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(34, 211, 167, 0.1)
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: .5
+      }
+
+      100% {
+        transform: scale(1.1);
+        opacity: .8
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    @media(max-width:900px) {
+
+      .g2,
+      .g3,
+      .g4,
+      .g7-5 {
+        grid-template-columns: 1fr
+      }
+
+      .pipeline {
+        flex-direction: column
+      }
+
+      .agent-arrow {
+        transform: rotate(90deg);
+        justify-content: center
+      }
+    }
+
+    @media(max-width:600px) {
+      .hero {
+        padding: 24px 18px
+      }
+
+      .hero h1 {
+        font-size: 1.6rem
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="side-nav" id="sideNav"></nav>
+  <canvas id="particles"></canvas>
+  <div class="wrap">
+
+    <!-- 1. HERO -->
+    <section class="section" id="s-hero">
+      <div class="hero">
+        <div class="section-label">Command Center</div>
+        <h1>AI Math Tutor War Room</h1>
+        <p>You are the human magic — AI handles the heavy lifting. This is your complete arsenal: every generative AI
+          tool, agent, prompt, and moonshot idea to make your tutoring sessions <strong>unforgettable</strong>. Keep
+          this open before &amp; during every session.</p>
+        <div class="hero-stats">
+          <div class="stat"><strong>2× Clarity</strong><span>One concept mastered per session</span></div>
+          <div class="stat"><strong>40% Student Talk</strong><span>Student explains, you coach</span></div>
+          <div class="stat"><strong>7-Min Checks</strong><span>Re-test understanding regularly</span></div>
+          <div class="stat"><strong>Compounding Notes</strong><span>Every class improves the next</span></div>
+          <div class="stat"><strong>AI Co-Pilot Active</strong><span>Real-time support during class</span></div>
+          <div class="stat"><strong>6 AI Agents</strong><span>Working in parallel for you</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. PRE-SESSION ARSENAL -->
+    <section class="section" id="s-pre">
+      <div class="section-label">Pre-Session AI Arsenal</div>
+      <div class="panel">
+        <h2>🔮 Preparation Stack — AI Tools Before Class</h2>
+        <p class="sub">Run these 15 minutes before every session. AI does the research so you walk in prepared.</p>
+        <div class="grid g4">
+          <div class="tool">
+            <div class="icon">🔍</div>
+            <h4>Diagnostic Agent</h4>
+            <p>Analyze past worksheets, tests and chat logs to detect weak spots and skill gaps automatically.</p><span
+              class="ai-tag">LLM + RAG</span>
+          </div>
+          <div class="tool">
+            <div class="icon">📝</div>
+            <h4>Question Generator</h4>
+            <p>Create 3 warm-up, 3 core, and 2 stretch questions tailored to today's topic and student level.</p><span
+              class="ai-tag">Text Generation</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🗺️</div>
+            <h4>Misconception Mapper</h4>
+            <p>Predict likely errors for today's topic based on common patterns and student's history.</p><span
+              class="ai-tag">LLM + Knowledge</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🎯</div>
+            <h4>Analogy Engine</h4>
+            <p>Generate real-life examples matched to the student's interests — sports, games, cooking, money.</p><span
+              class="ai-tag">Personalized Gen</span>
+          </div>
+          <div class="tool">
+            <div class="icon">📋</div>
+            <h4>Lesson Plan Builder</h4>
+            <p>Full structured plan from a single prompt: hook, explanation, practice, common mistakes, exit check.</p>
+            <span class="ai-tag">Structured Output</span>
+          </div>
+          <div class="tool">
+            <div class="icon">👤</div>
+            <h4>Student Profile Synth</h4>
+            <p>Build a session brief from all past data: strengths, patterns, emotional triggers, learning style.</p>
+            <span class="ai-tag">Memory + Summary</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🧩</div>
+            <h4>Prerequisite Scanner</h4>
+            <p>Check if foundational skills are solid before introducing new concepts. Flag gaps early.</p><span
+              class="ai-tag">Knowledge Graph</span>
+          </div>
+          <div class="tool">
+            <div class="icon">💭</div>
+            <h4>Confidence Predictor</h4>
+            <p>Estimate student's emotional readiness based on recent scores, chat tone, and session history.</p><span
+              class="ai-tag">Sentiment Analysis</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. LIVE CO-PILOT -->
+    <section class="section" id="s-live">
+      <div class="section-label">Live Session AI Co-Pilot</div>
+      <div class="panel">
+        <h2>⚡ During Session Support — Real-Time AI</h2>
+        <p class="sub">Your invisible co-teacher running in the background. These tools activate while you teach.</p>
+        <div class="grid g2">
+          <div class="tool">
+            <div class="icon">🎙️</div>
+            <h4>Real-Time Transcription</h4>
+            <p>Speech-to-text captures everything. AI flags confusion, hesitation, and key moments live.</p><span
+              class="ai-tag">Whisper + LLM</span>
+          </div>
+          <div class="tool">
+            <div class="icon">😕</div>
+            <h4>Confusion Detector</h4>
+            <p>Highlights repeated phrases, filler words, long pauses, and backtracking that signal confusion.</p><span
+              class="ai-tag">NLP Analysis</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🪜</div>
+            <h4>Hint Ladder Generator</h4>
+            <p>Tiered hints: Hint 1 (tiny nudge) → Hint 2 (guided) → Hint 3 (almost there). Never gives full answer.</p>
+            <span class="ai-tag">Chain-of-Thought</span>
+          </div>
+          <div class="tool">
+            <div class="icon">✨</div>
+            <h4>Live Simplifier</h4>
+            <p>Instantly rewrite your explanation at the student's grade level and vocabulary. One-click simplify.</p>
+            <span class="ai-tag">Text Rewriting</span>
+          </div>
+          <div class="tool">
+            <div class="icon">⏱️</div>
+            <h4>Pace Watcher</h4>
+            <p>Signals when to slow down, test understanding, or move ahead based on conversation flow.</p><span
+              class="ai-tag">Temporal Analysis</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🎨</div>
+            <h4>Whiteboard AI Critic</h4>
+            <p>Analyzes your board layout and suggests cleaner diagrams, better labels, and visual emphasis.</p><span
+              class="ai-tag">Vision + OCR</span>
+          </div>
+          <div class="tool">
+            <div class="icon">📊</div>
+            <h4>Engagement Pulse</h4>
+            <p>Detect drops in attention and energy. Get nudges like "try a concrete example now."</p><span
+              class="ai-tag">Behavioral AI</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🔄</div>
+            <h4>Dynamic Example Switch</h4>
+            <p>Swap abstract examples for ones matching student interests in real-time.</p><span class="ai-tag">Context
+              Retrieval</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🤔</div>
+            <h4>Socratic Q Generator</h4>
+            <p>Never run out of probing questions. AI generates "why" and "what if" questions live.</p><span
+              class="ai-tag">Prompt Engineering</span>
+          </div>
+          <div class="tool">
+            <div class="icon">😊</div>
+            <h4>Emotion &amp; Tone Analyzer</h4>
+            <p>Detect frustration, excitement, boredom, or anxiety from voice tone and language patterns.</p><span
+              class="ai-tag">Multimodal AI</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. POST-SESSION ENGINE -->
+    <section class="section" id="s-post">
+      <div class="section-label">Post-Session AI Engine</div>
+      <div class="panel">
+        <h2>📊 Compounding Loop — AI After Class</h2>
+        <p class="sub">6 minutes after class. AI builds on every session so the next one is even better.</p>
+        <div class="grid g4">
+          <div class="tool">
+            <div class="icon">📄</div>
+            <h4>Auto Session Summary</h4>
+            <p>What improved, what's still weak, what to do next. Generated from transcript and notes.</p><span
+              class="ai-tag">Summarization</span>
+          </div>
+          <div class="tool">
+            <div class="icon">📚</div>
+            <h4>Homework Customizer</h4>
+            <p>15-minute drill matched to today's errors. Adaptive difficulty based on performance.</p><span
+              class="ai-tag">Adaptive Gen</span>
+          </div>
+          <div class="tool">
+            <div class="icon">👨‍👩‍👦</div>
+            <h4>Parent Update Writer</h4>
+            <p>Concise progress note with confidence score and goals. Professional and warm tone.</p><span
+              class="ai-tag">Tone-Tuned Gen</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🧠</div>
+            <h4>Memory Updater</h4>
+            <p>Save student profile — preferences, breakthroughs, emotional patterns for next session.</p><span
+              class="ai-tag">Long-Term Memory</span>
+          </div>
+          <div class="tool">
+            <div class="icon">📈</div>
+            <h4>Progress Visualizer</h4>
+            <p>Show growth trend across sessions. Auto-generate charts of concept mastery over time.</p><span
+              class="ai-tag">Data Viz + LLM</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🔁</div>
+            <h4>Spaced Repetition</h4>
+            <p>Schedule when to revisit weak topics. AI calculates optimal review timing for each concept.</p><span
+              class="ai-tag">Algorithm + LLM</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🎬</div>
+            <h4>Recording Analyzer</h4>
+            <p>Extract key teaching moments from session recordings. Auto-clip breakthroughs and struggles.</p><span
+              class="ai-tag">Video + Audio AI</span>
+          </div>
+          <div class="tool">
+            <div class="icon">🎓</div>
+            <h4>Learning Style Adapter</h4>
+            <p>Detect if student responds best to visual, verbal, kinesthetic, or logical approaches.</p><span
+              class="ai-tag">Classification</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PROMPT COMMAND DECK -->
+    <section class="section" id="s-prompts">
+      <div class="section-label">Prompt Command Deck</div>
+      <div class="panel">
+        <h2>🎯 Ready-to-Use Prompt Library</h2>
+        <p class="sub">Click any prompt to copy. Paste into ChatGPT, Claude, or Gemini.</p>
+        <div class="tabs" id="promptTabs">
+          <button class="tab active" data-cat="all">All</button>
+          <button class="tab" data-cat="plan">Planning</button>
+          <button class="tab" data-cat="rescue">Rescue</button>
+          <button class="tab" data-cat="assess">Assessment</button>
+          <button class="tab" data-cat="creative">Creative</button>
+          <button class="tab" data-cat="comm">Communication</button>
+          <button class="tab" data-cat="analytics">Analytics</button>
+        </div>
+        <div class="grid g3" id="promptGrid">
+          <div class="prompt" data-cat="plan"
+            data-p="Act as my math co-teacher. Topic: [topic]. Student level: [level]. Build a 10-minute flow with hook, explanation, guided practice, common mistakes, and exit check.">
+            <h4>10-Min Lesson Builder</h4>
+            <p>Structured lesson flow with hook, practice, exit check</p><span class="cat">Planning</span>
+          </div>
+          <div class="prompt" data-cat="rescue"
+            data-p="Student is stuck at step [x]. Do NOT give full solution. Give 3 hints from easiest to strongest. After each hint, include one question I should ask.">
+            <h4>Hint Ladder Rescue</h4>
+            <p>3 tiered hints without giving away the answer</p><span class="cat">Rescue</span>
+          </div>
+          <div class="prompt" data-cat="rescue"
+            data-p="Rewrite my explanation so a nervous student understands in 30 seconds. Use one everyday metaphor and one quick check question.">
+            <h4>30-Sec Clarity Upgrade</h4>
+            <p>Simplify with metaphors for nervous students</p><span class="cat">Rescue</span>
+          </div>
+          <div class="prompt" data-cat="assess"
+            data-p="From this student error: [error], infer top 3 misconceptions ranked by severity. Give one 3-minute mini-drill for each.">
+            <h4>Misconception Decoder</h4>
+            <p>Infer misconceptions and create targeted drills</p><span class="cat">Assessment</span>
+          </div>
+          <div class="prompt" data-cat="plan"
+            data-p="Create a diagnostic pre-test for [topic] with 5 questions testing different prerequisites. Include answer key showing which gap each wrong answer reveals.">
+            <h4>Pre-Test Diagnostic</h4>
+            <p>5-question diagnostic to uncover gaps</p><span class="cat">Planning</span>
+          </div>
+          <div class="prompt" data-cat="creative"
+            data-p="Turn [math concept] into an adventure story for a student interested in [interest]. The story requires solving math to progress. Include 3 decision points.">
+            <h4>Math Story Generator</h4>
+            <p>Math as adventure stories matched to interests</p><span class="cat">Creative</span>
+          </div>
+          <div class="prompt" data-cat="creative"
+            data-p="Generate a visual mnemonic or memory trick for [formula/rule]. Make it funny, surprising, or connected to pop culture.">
+            <h4>Visual Mnemonic Maker</h4>
+            <p>Memorable tricks for formulas and rules</p><span class="cat">Creative</span>
+          </div>
+          <div class="prompt" data-cat="comm"
+            data-p="Write a parent update for [student]. Covered [topic]. Improved in [area], needs work on [gap]. Confidence: [1-10]. Under 100 words, warm and professional.">
+            <h4>Parent Update Drafter</h4>
+            <p>Professional progress note for parents</p><span class="cat">Communication</span>
+          </div>
+          <div class="prompt" data-cat="assess"
+            data-p="Analyze this student solution step by step. Identify where reasoning breaks down. Suggest one targeted exercise to fix that gap.">
+            <h4>Solution Analyzer</h4>
+            <p>Find where student reasoning breaks</p><span class="cat">Assessment</span>
+          </div>
+          <div class="prompt" data-cat="analytics"
+            data-p="Analyze this session transcript. Identify: confusion moments, breakthroughs, topics needing review, emotional arc, teaching effectiveness /10.">
+            <h4>Session Intelligence</h4>
+            <p>Deep transcript analysis for insights</p><span class="cat">Analytics</span>
+          </div>
+          <div class="prompt" data-cat="creative"
+            data-p="Create a gamified challenge for [topic]. Points for: explaining reasoning (10pts), catching mistakes (15pts), teaching back (20pts).">
+            <h4>Gamified Challenge</h4>
+            <p>Turn practice into a point-scoring game</p><span class="cat">Creative</span>
+          </div>
+          <div class="prompt" data-cat="analytics"
+            data-p="Compare last 4 session transcripts. Identify: concepts mastered, recurring struggles, learning velocity, confidence trend, next 3 focus topics.">
+            <h4>Progress Deep Dive</h4>
+            <p>Multi-session trend analysis</p><span class="cat">Analytics</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn" id="randomPromptBtn">🎲 Random Prompt</button>
+          <button class="btn" id="copyPromptBtn">📋 Copy Selected</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. INNOVATION LAB -->
+    <section class="section" id="s-lab">
+      <div class="section-label">Innovation Lab — Discovery &amp; Moonshots</div>
+      <div class="panel">
+        <h2>🚀 Build Your Tutoring Moat With AI</h2>
+        <p class="sub">Build one each month. Each uses generative AI uniquely.</p>
+        <div class="tabs" id="labTabs">
+          <button class="tab active" data-tier="all">All Ideas</button>
+          <button class="tab" data-tier="now">🟢 Build Now</button>
+          <button class="tab" data-tier="next">🔵 Build Next</button>
+          <button class="tab" data-tier="moon">🟣 Moonshot</button>
+        </div>
+        <div class="grid g3" id="labGrid">
+          <div class="inno" data-tier="now"><span class="tier now">Build Now</span>
+            <h3>Student Digital Twin</h3>
+            <p>Simulate student from past data. Rehearse lessons against the sim.</p>
+            <div class="tech-row"><span class="tech">LLM</span><span class="tech">Vector DB</span><span
+                class="tech">Memory</span></div>
+          </div>
+          <div class="inno" data-tier="now"><span class="tier now">Build Now</span>
+            <h3>Real-Time Error Radar</h3>
+            <p>Live speech transcription flags confusion, hesitation, skipped reasoning.</p>
+            <div class="tech-row"><span class="tech">Whisper</span><span class="tech">Sentiment</span><span
+                class="tech">NLP</span></div>
+          </div>
+          <div class="inno" data-tier="now"><span class="tier now">Build Now</span>
+            <h3>AI Worksheet Generator</h3>
+            <p>Unlimited practice with progressive difficulty, auto-grading, hints.</p>
+            <div class="tech-row"><span class="tech">GPT-4</span><span class="tech">LaTeX</span><span
+                class="tech">Adaptive</span></div>
+          </div>
+          <div class="inno" data-tier="now"><span class="tier now">Build Now</span>
+            <h3>Smart Flashcard Creator</h3>
+            <p>Auto-flashcards from transcripts with spaced repetition.</p>
+            <div class="tech-row"><span class="tech">LLM</span><span class="tech">Image Gen</span><span
+                class="tech">SRS</span></div>
+          </div>
+          <div class="inno" data-tier="now"><span class="tier now">Build Now</span>
+            <h3>Adaptive Story Engine</h3>
+            <p>Turn dry topics into stories using student interests.</p>
+            <div class="tech-row"><span class="tech">LLM</span><span class="tech">Preference</span><span
+                class="tech">Templates</span></div>
+          </div>
+          <div class="inno" data-tier="now"><span class="tier now">Build Now</span>
+            <h3>Voice Practice Partner</h3>
+            <p>Student explains to AI that asks follow-ups and scores quality.</p>
+            <div class="tech-row"><span class="tech">TTS</span><span class="tech">STT</span><span
+                class="tech">Evaluation</span></div>
+          </div>
+          <div class="inno" data-tier="next"><span class="tier next">Build Next</span>
+            <h3>Auto Whiteboard Critic</h3>
+            <p>AI analyzes your board and suggests cleaner visuals.</p>
+            <div class="tech-row"><span class="tech">Vision</span><span class="tech">OCR</span><span
+                class="tech">Layout</span></div>
+          </div>
+          <div class="inno" data-tier="next"><span class="tier next">Build Next</span>
+            <h3>Multi-Modal Explainer</h3>
+            <p>Text + diagram + animation + audio for any concept.</p>
+            <div class="tech-row"><span class="tech">DALL-E</span><span class="tech">TTS</span><span
+                class="tech">Video</span></div>
+          </div>
+          <div class="inno" data-tier="next"><span class="tier next">Build Next</span>
+            <h3>Gamified Quest System</h3>
+            <p>Curriculum as RPG: XP, skill trees, boss battles, badges.</p>
+            <div class="tech-row"><span class="tech">LLM</span><span class="tech">Game Logic</span><span
+                class="tech">Art</span></div>
+          </div>
+          <div class="inno" data-tier="next"><span class="tier next">Build Next</span>
+            <h3>AI Study Group Sim</h3>
+            <p>AI classmates solve alongside student, make mistakes, discuss.</p>
+            <div class="tech-row"><span class="tech">Multi-Agent</span><span class="tech">Persona</span><span
+                class="tech">Dialog</span></div>
+          </div>
+          <div class="inno" data-tier="next"><span class="tier next">Build Next</span>
+            <h3>Knowledge Graph Builder</h3>
+            <p>Visualize how concepts connect and where student stands.</p>
+            <div class="tech-row"><span class="tech">LLM</span><span class="tech">Graph DB</span><span
+                class="tech">D3.js</span></div>
+          </div>
+          <div class="inno" data-tier="moon"><span class="tier moon">Moonshot</span>
+            <h3>AR Algebra Layer</h3>
+            <p>Point phone at objects; see algebraic relationships in AR.</p>
+            <div class="tech-row"><span class="tech">ARKit</span><span class="tech">Detection</span><span
+                class="tech">3D</span></div>
+          </div>
+          <div class="inno" data-tier="moon"><span class="tier moon">Moonshot</span>
+            <h3>Multi-Agent Director</h3>
+            <p>4 AI agents run simultaneously: pacing, errors, examples, mood.</p>
+            <div class="tech-row"><span class="tech">Orchestration</span><span class="tech">Tools</span><span
+                class="tech">Memory</span></div>
+          </div>
+          <div class="inno" data-tier="moon"><span class="tier moon">Moonshot</span>
+            <h3>AI Teaching Coach</h3>
+            <p>AI coaches YOU — analyzes patterns and rates your sessions.</p>
+            <div class="tech-row"><span class="tech">Meta-Learn</span><span class="tech">Transcript</span><span
+                class="tech">Feedback</span></div>
+          </div>
+          <div class="inno" data-tier="moon"><span class="tier moon">Moonshot</span>
+            <h3>Emotional Intelligence AI</h3>
+            <p>Reads expressions and voice to understand student emotions.</p>
+            <div class="tech-row"><span class="tech">Vision</span><span class="tech">Audio</span><span
+                class="tech">Affective</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. AGENT ARCHITECTURE -->
+    <section class="section" id="s-agents">
+      <div class="section-label">AI Agent Architecture</div>
+      <div class="panel">
+        <h2>🤖 Your 6-Agent Team — Build This Today</h2>
+        <p class="sub">Each agent has one job. Chain them for a full AI-powered pipeline.</p>
+        <div class="pipeline">
+          <div class="agent-card">
+            <div class="num">1</div>
+            <h4>Diagnoser</h4>
+            <p>Past tests → weakness map, confidence, top targets</p>
+          </div>
+          <div class="agent-arrow">→</div>
+          <div class="agent-card">
+            <div class="num">2</div>
+            <h4>Planner</h4>
+            <p>Gaps → lesson plan with timing, hooks, checkpoints</p>
+          </div>
+          <div class="agent-arrow">→</div>
+          <div class="agent-card">
+            <div class="num">3</div>
+            <h4>Explainer</h4>
+            <p>Topic → simple explanation, analogy, check question</p>
+          </div>
+          <div class="agent-arrow">→</div>
+          <div class="agent-card">
+            <div class="num">4</div>
+            <h4>Drill Coach</h4>
+            <p>Errors → custom practice with progressive hints</p>
+          </div>
+          <div class="agent-arrow">→</div>
+          <div class="agent-card">
+            <div class="num">5</div>
+            <h4>Assessor</h4>
+            <p>Work → rubric score, gap analysis, next steps</p>
+          </div>
+          <div class="agent-arrow">→</div>
+          <div class="agent-card">
+            <div class="num">6</div>
+            <h4>Reporter</h4>
+            <p>Data → parent update, homework, next plan</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. CHECKLIST + ETHICS -->
+    <section class="section" id="s-check">
+      <div class="section-label">Execution Checklist &amp; AI Ethics</div>
+      <div class="grid g2">
+        <div class="panel">
+          <h2>✅ Session Non-Negotiables</h2>
+          <div class="grid" style="gap:8px">
+            <label class="check"><input type="checkbox"> Student explains concept in own words before final
+              answer.</label>
+            <label class="check"><input type="checkbox"> Isolate exactly one misconception and fix it deeply.</label>
+            <label class="check"><input type="checkbox"> Create at least one confidence-building success moment.</label>
+            <label class="check"><input type="checkbox"> End with next micro-goal and 15-minute drill.</label>
+            <label class="check"><input type="checkbox"> Store notes to power next-class AI planning.</label>
+            <label class="check"><input type="checkbox"> Ask at least 3 "why" or "what if" questions.</label>
+            <label class="check"><input type="checkbox"> Review AI suggestions (don't blindly follow).</label>
+          </div>
+          <div class="focus-bar">
+            <strong>Live Focus Prompt</strong>
+            <p id="focusPrompt">Ask one deeper "why" question every 5 minutes.</p>
+          </div>
+          <div class="btn-group"><button class="btn" id="rotateFocusBtn">🔄 Rotate Focus</button></div>
+        </div>
+        <div class="panel">
+          <h2>🛡️ AI Ethics &amp; Safety</h2>
+          <p class="sub">AI amplifies you — it never replaces your judgment.</p>
+          <div class="grid" style="gap:8px">
+            <div class="tool">
+              <div class="icon">🚫</div>
+              <h4>Never Auto-Answer</h4>
+              <p>AI never gives the final answer. Always route through hints.</p>
+            </div>
+            <div class="tool">
+              <div class="icon">🔒</div>
+              <h4>Data Privacy First</h4>
+              <p>Student data stays encrypted. No personal info in public AI.</p>
+            </div>
+            <div class="tool">
+              <div class="icon">🧑‍🏫</div>
+              <h4>Human Override</h4>
+              <p>Every AI suggestion is a suggestion. You decide for THIS student.</p>
+            </div>
+            <div class="tool">
+              <div class="icon">⚖️</div>
+              <h4>Bias Check</h4>
+              <p>Review AI content for sensitivity and stereotype-free language.</p>
+            </div>
+            <div class="tool">
+              <div class="icon">📢</div>
+              <h4>Transparency</h4>
+              <p>Normalize AI as a co-learning partner with the student.</p>
+            </div>
+          </div>
+          <div class="danger">⚠️ <strong>Critical:</strong> If you only optimize for correct answers and ignore
+            <em>how</em> a student thinks, AI leverage stays shallow. Track thinking, then tune teaching.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Particles
+    const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
+    window.addEventListener('resize', resize); resize();
+    for (let i = 0; i < 60; i++)particles.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 2 + 0.5, dx: (Math.random() - 0.5) * 0.4, dy: (Math.random() - 0.5) * 0.4, o: Math.random() * 0.3 + 0.1 });
+    function drawParticles() {
+      ctx.clearRect(0, 0, W, H); particles.forEach(p => { p.x += p.dx; p.y += p.dy; if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < 0) p.y = H; if (p.y > H) p.y = 0; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(34,211,167,${p.o})`; ctx.fill() });
+      particles.forEach((a, i) => { particles.slice(i + 1).forEach(b => { const d = Math.hypot(a.x - b.x, a.y - b.y); if (d < 120) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = `rgba(59,130,246,${0.06 * (1 - d / 120)})`; ctx.stroke() } }) });
+      requestAnimationFrame(drawParticles)
+    }
+    drawParticles();
+
+    // Scroll reveal
+    const sections = document.querySelectorAll('.section');
+    const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }) }, { threshold: 0.08 });
+    sections.forEach(s => obs.observe(s));
+
+    // Side nav
+    const navIds = ['s-hero', 's-pre', 's-live', 's-post', 's-prompts', 's-lab', 's-agents', 's-check'];
+    const navEl = document.getElementById('sideNav');
+    navIds.forEach(id => { const a = document.createElement('a'); a.href = '#' + id; const tip = document.createElement('span'); tip.className = 'nav-tip'; tip.textContent = id.replace('s-', '').replace(/-/g, ' '); a.appendChild(tip); navEl.appendChild(a) });
+
+    // Prompt tabs
+    document.getElementById('promptTabs').addEventListener('click', e => { if (!e.target.classList.contains('tab')) return; document.querySelectorAll('#promptTabs .tab').forEach(t => t.classList.remove('active')); e.target.classList.add('active'); const cat = e.target.dataset.cat; document.querySelectorAll('#promptGrid .prompt').forEach(p => { p.style.display = cat === 'all' || p.dataset.cat === cat ? '' : 'none' }) });
+
+    // Lab tabs
+    document.getElementById('labTabs').addEventListener('click', e => { if (!e.target.classList.contains('tab')) return; document.querySelectorAll('#labTabs .tab').forEach(t => t.classList.remove('active')); e.target.classList.add('active'); const tier = e.target.dataset.tier; document.querySelectorAll('#labGrid .inno').forEach(c => { c.style.display = tier === 'all' || c.dataset.tier === tier ? '' : 'none' }) });
+
+    // Prompt copy
+    let selectedPrompt = null;
+    document.querySelectorAll('.prompt').forEach(p => { p.addEventListener('click', () => { document.querySelectorAll('.prompt').forEach(x => x.style.borderColor = ''); p.style.borderColor = 'var(--glow-amber)'; selectedPrompt = p.dataset.p; navigator.clipboard.writeText(selectedPrompt).then(() => { const btn = document.getElementById('copyPromptBtn'); btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = '📋 Copy Selected', 1200) }) }) });
+    document.getElementById('randomPromptBtn').addEventListener('click', () => { const prompts = document.querySelectorAll('#promptGrid .prompt'); const p = prompts[Math.floor(Math.random() * prompts.length)]; p.click(); p.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
+    document.getElementById('copyPromptBtn').addEventListener('click', () => { if (selectedPrompt) { navigator.clipboard.writeText(selectedPrompt).then(() => { const btn = document.getElementById('copyPromptBtn'); btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = '📋 Copy Selected', 1200) }) } });
+
+    // Focus rotation
+    const focusPrompts = ["Ask one deeper \"why\" question every 5 minutes.", "Let the student attempt first, then coach with hints only.", "Convert one abstract step into a concrete visual example now.", "Pause and re-check understanding before introducing a new method.", "Praise reasoning quality, not just the correct final answer.", "Identify the exact step where confusion begins and fix that step.", "Use silence — give the student 10 seconds to think before helping.", "Connect this topic to something they already understand well."];
+    document.getElementById('rotateFocusBtn').addEventListener('click', () => { document.getElementById('focusPrompt').textContent = focusPrompts[Math.floor(Math.random() * focusPrompts.length)] });
+  </script>
+</body>
+
+</html>

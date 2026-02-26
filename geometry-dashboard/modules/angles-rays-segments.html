@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometry Concept: Angles, Rays, & Segments</title>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+      }
+
+      /* Math Notation Styling */
+      .math-ray {
+        text-decoration: overline;
+        position: relative;
+        display: inline-block;
+      }
+      .math-ray::after {
+        content: '>';
+        position: absolute;
+        top: -12px;
+        right: -2px;
+        font-size: 0.8em;
+        font-weight: bold;
+      }
+
+      .math-segment {
+        border-top: 2px solid currentColor;
+        display: inline-block;
+        line-height: 1.2;
+        padding-top: 2px;
+      }
+
+      .notebook-line {
+        background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+        background-size: 100% 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState } = React;
+
+      // --- Icons (inline SVG) ---
+      const BookOpen = ({ size = 20 }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+      );
+      const PlayCircle = ({ size = 20 }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="10 8 16 12 10 16 10 8" />
+        </svg>
+      );
+      const CheckCircle = ({ size = 20 }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      );
+
+      // --- Notation Components ---
+      const SegmentNotation = ({ text }) => (
+        <span className="inline-flex flex-col items-center mx-1 align-middle">
+          <span className="w-full h-0.5 bg-black mb-0.5"></span>
+          <span className="leading-none">{text}</span>
+        </span>
+      );
+
+      const RayNotation = ({ text }) => (
+        <span className="inline-flex flex-col items-center mx-1 align-middle">
+          <span className="w-full flex items-center justify-end h-1.5 mb-0.5 relative">
+            <span className="absolute w-full h-0.5 bg-black top-0.5"></span>
+            <span className="text-black text-[10px] leading-none -mt-2 -mr-0.5">▶</span>
+          </span>
+          <span className="leading-none">{text}</span>
+        </span>
+      );
+
+      const AngleNotation = ({ text }) => (
+        <span className="inline-flex items-center mx-1 font-medium">
+          <span className="text-lg mr-0.5">∠</span>
+          {text}
+        </span>
+      );
+
+      // --- Main Application ---
+      const App = () => {
+        const [activeTab, setActiveTab] = useState("concepts");
+
+        return (
+          <div className="min-h-screen bg-slate-50 text-slate-800">
+            {/* Header */}
+            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+              <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-indigo-600 p-2 rounded-lg text-white">
+                    <BookOpen size={20} />
+                  </div>
+                  <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-600">
+                    Geometry Master
+                  </h1>
+                </div>
+                <nav className="flex bg-slate-100 p-1 rounded-lg">
+                  {[
+                    { id: "concepts", label: "1. First Principles", icon: BookOpen },
+                    { id: "simulation", label: "2. Visual Lab", icon: PlayCircle },
+                    { id: "practice", label: "3. Solve Problem", icon: CheckCircle },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                        activeTab === tab.id
+                          ? "bg-white text-indigo-700 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      <tab.icon size={16} />
+                      {tab.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </header>
+
+            <main className="max-w-5xl mx-auto px-4 py-8">
+              {activeTab === "concepts" && <ConceptsSection />}
+              {activeTab === "simulation" && <SimulationSection />}
+              {activeTab === "practice" && <PracticeSection />}
+            </main>
+          </div>
+        );
+      };
+
+      // --- Section 1: First Principles ---
+      const ConceptsSection = () => {
+        return (
+          <div className="space-y-8 animate-fade-in">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Building Blocks of Geometry</h2>
+              <p className="text-slate-600 text-lg">
+                Before we solve the problem, let&apos;s understand the three core players: Segments, Rays, and Angles.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Card 1: Line Segment */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-40 bg-blue-50 flex items-center justify-center border-b border-blue-100 relative">
+                  <svg width="200" height="100" className="w-full h-full">
+                    <line x1="60" y1="50" x2="140" y2="50" stroke="#2563EB" strokeWidth="4" />
+                    <circle cx="60" cy="50" r="5" fill="#2563EB" />
+                    <circle cx="140" cy="50" r="5" fill="#2563EB" />
+                    <text x="50" y="75" className="text-sm font-bold fill-slate-500">
+                      A
+                    </text>
+                    <text x="140" y="75" className="text-sm font-bold fill-slate-500">
+                      B
+                    </text>
+                  </svg>
+                  <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded text-xs font-mono border text-blue-600 font-bold border-blue-200">
+                    <SegmentNotation text="AB" />
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Line Segment</h3>
+                  <p className="text-slate-600 text-sm mb-4">
+                    A part of a line that has <strong>two endpoints</strong>. It stops at both ends.
+                  </p>
+                  <div className="bg-slate-50 p-3 rounded-lg text-sm text-slate-700">
+                    <strong>Real world:</strong> A pencil, a ruler, the edge of a table.
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Ray */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-40 bg-green-50 flex items-center justify-center border-b border-green-100 relative">
+                  <svg width="200" height="100" className="w-full h-full">
+                    <defs>
+                      <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#16A34A" />
+                      </marker>
+                    </defs>
+                    <line x1="60" y1="50" x2="140" y2="50" stroke="#16A34A" strokeWidth="4" markerEnd="url(#arrow-green)" />
+                    <circle cx="60" cy="50" r="5" fill="#16A34A" />
+                    <text x="50" y="75" className="text-sm font-bold fill-slate-500">
+                      A
+                    </text>
+                    <text x="140" y="75" className="text-sm font-bold fill-slate-500">
+                      B
+                    </text>
+                  </svg>
+                  <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded text-xs font-mono border text-green-600 font-bold border-green-200">
+                    <RayNotation text="AB" />
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Ray</h3>
+                  <p className="text-slate-600 text-sm mb-4">
+                    Starts at <strong>one endpoint</strong> and goes on forever in one direction.
+                  </p>
+                  <div className="bg-slate-50 p-3 rounded-lg text-sm text-slate-700">
+                    <strong>Real world:</strong> Sunlight, a laser pointer beam.
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Angle */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-40 bg-purple-50 flex items-center justify-center border-b border-purple-100 relative">
+                  <svg width="200" height="100" className="w-full h-full">
+                    <defs>
+                      <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#9333EA" />
+                      </marker>
+                    </defs>
+                    {/* Ray 1 */}
+                    <line x1="60" y1="80" x2="140" y2="80" stroke="#9333EA" strokeWidth="4" markerEnd="url(#arrow-purple)" />
+                    {/* Ray 2 */}
+                    <line x1="60" y1="80" x2="60" y2="20" stroke="#9333EA" strokeWidth="4" markerEnd="url(#arrow-purple)" />
+                    {/* Vertex */}
+                    <circle cx="60" cy="80" r="5" fill="#9333EA" />
+                    {/* Arc */}
+                    <path d="M80 80 A 20 20 0 0 0 60 60" fill="none" stroke="#9333EA" strokeWidth="2" strokeDasharray="4 2" />
+                    <text x="45" y="95" className="text-sm font-bold fill-slate-500">
+                      V
+                    </text>
+                    <text x="70" y="70" className="text-xs font-bold fill-purple-700">
+                      Angle
+                    </text>
+                  </svg>
+                  <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded text-xs font-mono border text-purple-600 font-bold border-purple-200">
+                    <AngleNotation text="1" />
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Angle</h3>
+                  <p className="text-slate-600 text-sm mb-4">
+                    Formed by <strong>two rays</strong> that share the same endpoint (called the vertex).
+                  </p>
+                  <div className="bg-slate-50 p-3 rounded-lg text-sm text-slate-700">
+                    <strong>Naming:</strong> Use 3 letters (vertex in middle) or the vertex letter or a number.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Section 2: Visual Simulation ---
+      const SimulationSection = () => {
+        const [highlight, setHighlight] = useState(null); // 'rayFG', 'segFH', 'angle'
+
+        return (
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div className="order-2 lg:order-1 space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Interactive Geometry Lab</h2>
+                <p className="text-slate-600 mt-2">
+                  Explore the diagram. Click the buttons to isolate different geometric parts within the main image.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => setHighlight(highlight === "rayFG" ? null : "rayFG")}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                    highlight === "rayFG" ? "border-green-500 bg-green-50" : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <div>
+                    <span className="block font-bold text-slate-800">
+                      Show Ray <RayNotation text="FG" />
+                    </span>
+                    <span className="text-sm text-slate-500">Starts at F, goes through G forever.</span>
+                  </div>
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      highlight === "rayFG" ? "border-green-500 bg-green-500 text-white" : "border-slate-300"
+                    }`}
+                  >
+                    {highlight === "rayFG" && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setHighlight(highlight === "segFH" ? null : "segFH")}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                    highlight === "segFH" ? "border-blue-500 bg-blue-50" : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <div>
+                    <span className="block font-bold text-slate-800">
+                      Show Segment <SegmentNotation text="FH" />
+                    </span>
+                    <span className="text-sm text-slate-500">Connects F to H. Stops at H.</span>
+                  </div>
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      highlight === "segFH" ? "border-blue-500 bg-blue-500 text-white" : "border-slate-300"
+                    }`}
+                  >
+                    {highlight === "segFH" && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setHighlight(highlight === "angle" ? null : "angle")}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                    highlight === "angle" ? "border-purple-500 bg-purple-50" : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <div>
+                    <span className="block font-bold text-slate-800">
+                      Show Angle <AngleNotation text="HFG" /> (Angle 4)
+                    </span>
+                    <span className="text-sm text-slate-500">The corner created by the two rays.</span>
+                  </div>
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      highlight === "angle" ? "border-purple-500 bg-purple-500 text-white" : "border-slate-300"
+                    }`}
+                  >
+                    {highlight === "angle" && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Simulation Canvas */}
+            <div className="order-1 lg:order-2 bg-white rounded-2xl shadow-lg border border-slate-200 p-8 flex items-center justify-center min-h-[400px]">
+              <svg width="350" height="350" viewBox="0 0 350 350">
+                <defs>
+                  <marker id="arrow-black" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+                  </marker>
+                  <marker id="arrow-green-lg" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#22c55e" />
+                  </marker>
+                  <marker id="arrow-blue-lg" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6" />
+                  </marker>
+                </defs>
+
+                {/* The Main Angle Structure */}
+                <line x1="50" y1="300" x2="50" y2="50" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#arrow-black)" />
+                <line x1="50" y1="300" x2="300" y2="300" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#arrow-black)" />
+
+                {/* Points */}
+                <circle cx="50" cy="300" r="4" fill="#334155" />
+                <text x="35" y="325" className="text-2xl font-bold fill-slate-600 font-sans">
+                  F
+                </text>
+
+                <line x1="45" y1="120" x2="55" y2="120" stroke="#334155" strokeWidth="2" />
+                <text x="15" y="125" className="text-2xl font-bold fill-slate-600 font-sans">
+                  H
+                </text>
+
+                <line x1="250" y1="295" x2="250" y2="305" stroke="#334155" strokeWidth="2" />
+                <text x="245" y="335" className="text-2xl font-bold fill-slate-600 font-sans">
+                  G
+                </text>
+
+                <text x="65" y="285" className="text-xl font-bold fill-blue-900 font-sans">
+                  4
+                </text>
+
+                {/* --- INTERACTIVE LAYERS --- */}
+                {highlight === "angle" && (
+                  <g>
+                    <path d="M50 240 A 60 60 0 0 1 110 300" fill="none" stroke="#a855f7" strokeWidth="4" />
+                    <path d="M50 240 L 50 300 L 110 300" fill="rgba(168, 85, 247, 0.2)" />
+                  </g>
+                )}
+
+                {highlight === "rayFG" && (
+                  <g>
+                    <line
+                      x1="50"
+                      y1="300"
+                      x2="320"
+                      y2="300"
+                      stroke="#22c55e"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      markerEnd="url(#arrow-green-lg)"
+                      opacity="0.8"
+                    />
+                    <circle cx="50" cy="300" r="6" fill="#22c55e" />
+                    <circle cx="250" cy="300" r="6" fill="#22c55e" />
+                  </g>
+                )}
+
+                {highlight === "segFH" && (
+                  <g>
+                    <line x1="50" y1="300" x2="50" y2="120" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" opacity="0.8" />
+                    <circle cx="50" cy="300" r="6" fill="#3b82f6" />
+                    <circle cx="50" cy="120" r="6" fill="#3b82f6" />
+                  </g>
+                )}
+              </svg>
+            </div>
+          </div>
+        );
+      };
+
+      // --- Section 3: Practice Problem ---
+      const PracticeSection = () => {
+        const [revealed, setRevealed] = useState({ q5: false, q6: false, q7: false });
+        const toggle = (q) => setRevealed((prev) => ({ ...prev, [q]: !prev[q] }));
+
+        return (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200">
+              <div className="bg-indigo-900 text-white p-6">
+                <h2 className="text-2xl font-bold">Practice Problem</h2>
+                <p className="opacity-80">Using the image below, answer the following questions.</p>
+              </div>
+
+              <div className="grid md:grid-cols-12 gap-0">
+                {/* Left: The Image Replica */}
+                <div className="md:col-span-5 bg-slate-50 border-r border-slate-200 p-8 flex items-center justify-center">
+                  <svg width="250" height="250" viewBox="0 0 250 250">
+                    <defs>
+                      <marker id="arrow-main" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L7,3 z" fill="#475569" />
+                      </marker>
+                    </defs>
+                    <line x1="40" y1="200" x2="40" y2="20" stroke="#475569" strokeWidth="2" markerEnd="url(#arrow-main)" />
+                    <line x1="40" y1="200" x2="220" y2="200" stroke="#475569" strokeWidth="2" markerEnd="url(#arrow-main)" />
+                    <text x="30" y="225" className="text-xl font-bold fill-slate-500 font-serif">
+                      F
+                    </text>
+                    <line x1="35" y1="80" x2="45" y2="80" stroke="#475569" strokeWidth="2" />
+                    <text x="10" y="85" className="text-xl font-bold fill-slate-500 font-serif">
+                      H
+                    </text>
+                    <line x1="180" y1="195" x2="180" y2="205" stroke="#475569" strokeWidth="2" />
+                    <text x="175" y="230" className="text-xl font-bold fill-slate-500 font-serif">
+                      G
+                    </text>
+                    <text x="50" y="185" className="text-lg font-bold fill-slate-700 font-serif">
+                      4
+                    </text>
+                  </svg>
+                </div>
+
+                {/* Right: The Questions */}
+                <div className="md:col-span-7 p-8 space-y-8 notebook-line">
+                  {/* Question 5 */}
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-bold text-lg text-slate-800">5) Name the angle:</span>
+                      <button
+                        onClick={() => toggle("q5")}
+                        className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 transition-colors"
+                      >
+                        {revealed.q5 ? "Hide Answer" : "Show Answer"}
+                      </button>
+                    </div>
+                    <div className={`transition-all duration-300 overflow-hidden ${revealed.q5 ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}`}>
+                      <div className="text-xl text-rose-500 font-serif font-medium border-b-2 border-slate-800 inline-block pb-1">
+                        <AngleNotation text="HFG" />, <AngleNotation text="GFH" />, <AngleNotation text="F" />, <AngleNotation text="4" />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2">
+                        <strong>Why?</strong> You can name an angle by the vertex (F), the number inside (4), or using 3 points with vertex in center (HFG or GFH).
+                      </p>
+                    </div>
+                    {!revealed.q5 && <div className="h-8 border-b border-slate-300 w-full"></div>}
+                  </div>
+
+                  {/* Question 6 */}
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-bold text-lg text-slate-800">6) Name a ray:</span>
+                      <button
+                        onClick={() => toggle("q6")}
+                        className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 transition-colors"
+                      >
+                        {revealed.q6 ? "Hide Answer" : "Show Answer"}
+                      </button>
+                    </div>
+                    <div className={`transition-all duration-300 overflow-hidden ${revealed.q6 ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}`}>
+                      <div className="text-xl text-rose-500 font-serif font-medium border-b-2 border-slate-800 inline-block pb-1">
+                        <RayNotation text="FG" /> or <RayNotation text="FH" />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2">
+                        <strong>Why?</strong> Rays start at a point (F) and go forever. So F to G (<RayNotation text="FG" />) is a ray. F to H is also a ray.
+                      </p>
+                    </div>
+                    {!revealed.q6 && <div className="h-8 border-b border-slate-300 w-full"></div>}
+                  </div>
+
+                  {/* Question 7 */}
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-bold text-lg text-slate-800">7) Name a line segment:</span>
+                      <button
+                        onClick={() => toggle("q7")}
+                        className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 transition-colors"
+                      >
+                        {revealed.q7 ? "Hide Answer" : "Show Answer"}
+                      </button>
+                    </div>
+                    <div className={`transition-all duration-300 overflow-hidden ${revealed.q7 ? "max-h-32 opacity-100" : "max-h-0 opacity-0"}`}>
+                      <div className="text-xl text-rose-500 font-serif font-medium border-b-2 border-slate-800 inline-block pb-1">
+                        <SegmentNotation text="FG" /> or <SegmentNotation text="FH" />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2">
+                        <strong>Why?</strong> A segment is just the connection between two specific points. The path from F to G is <SegmentNotation text="FG" />.
+                      </p>
+                    </div>
+                    {!revealed.q7 && <div className="h-8 border-b border-slate-300 w-full"></div>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
+
